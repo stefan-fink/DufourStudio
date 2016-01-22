@@ -1,0 +1,33 @@
+<resources>
+
+    <declare-styleable name="MapView">
+        
+        <attr name="mapGridTextSize" format="dimension" />
+        <attr name="mapGridDrawCoordinates" format="boolean" />
+        <attr name="mapGridNoDataText" format="string" />
+        
+        <attr name="poiPosSize" format="dimension" />
+        <attr name="poiPosColor" format="color"/>
+        <attr name="poiPosBorderColor" format="color"/>
+        <attr name="poiPosBorderStroke" format="dimension" />
+        
+        <attr name="gpsPosSize" format="dimension" />
+        <attr name="gpsPosColor" format="color"/>
+        <attr name="gpsPosAltColor" format="color"/>
+        <attr name="gpsPosBorderColor" format="color"/>
+        <attr name="gpsPosBorderStroke" format="dimension" />
+        <attr name="gpsPosAccuracyColor" format="color"/>
+        
+        <attr name="infoTextSize" format="dimension" />
+        <attr name="infoTextColor" format="color"/>
+        <attr name="infoLineColor" format="color"/>
+        <attr name="infoBackColor" format="color"/>
+        <attr name="infoBackAltColor" format="color"/>
+        <attr name="infoLineStroke" format="dimension" />
+        
+        <attr name="crossSize" format="dimension" />
+        <attr name="crossStroke" format="dimension" />
+        
+    </declare-styleable>
+    
+</resources>

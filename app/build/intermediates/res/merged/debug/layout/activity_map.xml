@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:custom="http://schemas.android.com/apk/res/ch.trillian.dufour"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+    <ch.trillian.dufour.MapView
+        android:id="@+id/map_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        
+        custom:mapGridTextSize="10dp" 
+        custom:mapGridDrawCoordinates="false"
+        custom:mapGridNoDataText="@string/grid_no_data"
+        
+        custom:poiPosSize="6.5dp" 
+        custom:poiPosColor="#FFFFFF00" 
+        custom:poiPosBorderColor="#FF000000" 
+        custom:poiPosBorderStroke="2.0dp"
+        
+        custom:gpsPosSize="6.5dp" 
+        custom:gpsPosColor="#FFFF0000" 
+        custom:gpsPosAltColor="#FF0000FF" 
+        custom:gpsPosBorderColor="#FF000000" 
+        custom:gpsPosBorderStroke="2.0dp"
+        custom:gpsPosAccuracyColor="#60000000" 
+        
+        custom:infoTextSize="22sp"
+        custom:infoTextColor="#FF404040"
+        custom:infoLineColor="#FF000000"
+        custom:infoBackColor="#A0FFFFFF"
+        custom:infoBackAltColor="#A0FFBBBB"
+        custom:infoLineStroke="1dp" 
+        
+        custom:crossSize="14dp" 
+        custom:crossStroke="1.3dp" />
+    
+</LinearLayout>

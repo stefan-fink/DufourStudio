@@ -1,0 +1,38 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/action_settings"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/action_settings" />
+    
+	<item
+        android:id="@+id/action_search"
+        android:icon="@drawable/ic_action_search"
+        android:showAsAction="always|collapseActionView"
+        android:actionViewClass="android.widget.SearchView"
+        android:title="@string/action_search" />
+    
+    <item
+        android:id="@+id/action_info"
+        android:icon="@drawable/ic_action_info_off"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_info" />
+    
+    <item
+        android:id="@+id/action_gps"
+        android:icon="@drawable/ic_action_gps_off"
+        android:showAsAction="ifRoom"
+        android:title="@string/action_gps" />
+    
+	<item
+        android:id="@+id/action_goto_poi"
+        android:showAsAction="never"
+        android:title="@string/action_goto_poi" />
+    
+    <item
+        android:id="@+id/action_clear_poi"
+        android:showAsAction="never"
+        android:title="@string/action_clear_poi" />
+
+</menu>

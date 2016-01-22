@@ -1,0 +1,258 @@
+[
+    {
+        "outputFile": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\build\\intermediates\\res\\merged\\debug\\values\\values.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 1083,
+                    "endColumn": 57,
+                    "endOffset": 1136
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\dimens.xml",
+                    "position": {
+                        "startLine": 3,
+                        "startColumn": 4,
+                        "startOffset": 92,
+                        "endColumn": 57,
+                        "endOffset": 145
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 4,
+                    "startColumn": 4,
+                    "startOffset": 1141,
+                    "endColumn": 55,
+                    "endOffset": 1192
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\dimens.xml",
+                    "position": {
+                        "startLine": 4,
+                        "startColumn": 4,
+                        "startOffset": 151,
+                        "endColumn": 55,
+                        "endOffset": 202
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 5,
+                    "startColumn": 4,
+                    "startOffset": 1197,
+                    "endColumn": 54,
+                    "endOffset": 1247
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 9,
+                        "startColumn": 4,
+                        "startOffset": 238,
+                        "endColumn": 54,
+                        "endOffset": 288
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 6,
+                    "startColumn": 4,
+                    "startOffset": 1252,
+                    "endColumn": 53,
+                    "endOffset": 1301
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 8,
+                        "startColumn": 4,
+                        "startOffset": 184,
+                        "endColumn": 53,
+                        "endOffset": 233
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 7,
+                    "startColumn": 4,
+                    "startOffset": 1306,
+                    "endColumn": 42,
+                    "endOffset": 1344
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 12,
+                        "startColumn": 4,
+                        "startOffset": 387,
+                        "endColumn": 42,
+                        "endOffset": 425
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 8,
+                    "startColumn": 4,
+                    "startOffset": 1349,
+                    "endColumn": 44,
+                    "endOffset": 1389
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 11,
+                        "startColumn": 4,
+                        "startOffset": 342,
+                        "endColumn": 44,
+                        "endOffset": 382
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 9,
+                    "startColumn": 4,
+                    "startOffset": 1394,
+                    "endColumn": 48,
+                    "endOffset": 1438
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 10,
+                        "startColumn": 4,
+                        "startOffset": 293,
+                        "endColumn": 48,
+                        "endOffset": 337
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 10,
+                    "startColumn": 4,
+                    "startOffset": 1443,
+                    "endColumn": 52,
+                    "endOffset": 1491
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 7,
+                        "startColumn": 4,
+                        "startOffset": 131,
+                        "endColumn": 52,
+                        "endOffset": 179
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 11,
+                    "startColumn": 4,
+                    "startOffset": 1496,
+                    "endColumn": 43,
+                    "endOffset": 1535
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 3,
+                        "startColumn": 4,
+                        "startOffset": 58,
+                        "endColumn": 43,
+                        "endOffset": 97
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 12,
+                    "startColumn": 4,
+                    "startOffset": 1540,
+                    "endColumn": 48,
+                    "endOffset": 1584
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 15,
+                        "startColumn": 4,
+                        "startOffset": 454,
+                        "endColumn": 48,
+                        "endOffset": 498
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 13,
+                    "startColumn": 4,
+                    "startOffset": 1589,
+                    "endColumn": 54,
+                    "endOffset": 1639
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\strings.xml",
+                    "position": {
+                        "startLine": 18,
+                        "startColumn": 4,
+                        "startOffset": 536,
+                        "endColumn": 54,
+                        "endOffset": 586
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 14,
+                    "startColumn": 4,
+                    "startOffset": 1644,
+                    "endLine": 20,
+                    "endColumn": 12,
+                    "endOffset": 1930
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\styles.xml",
+                    "position": {
+                        "startLine": 6,
+                        "startColumn": 4,
+                        "startOffset": 191,
+                        "endLine": 12,
+                        "endColumn": 12,
+                        "endOffset": 481
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 21,
+                    "startColumn": 4,
+                    "startOffset": 1935,
+                    "endLine": 23,
+                    "endColumn": 12,
+                    "endOffset": 2090
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values\\styles.xml",
+                    "position": {
+                        "startLine": 15,
+                        "startColumn": 4,
+                        "startOffset": 522,
+                        "endLine": 17,
+                        "endColumn": 12,
+                        "endOffset": 679
+                    }
+                }
+            }
+        ]
+    }
+]

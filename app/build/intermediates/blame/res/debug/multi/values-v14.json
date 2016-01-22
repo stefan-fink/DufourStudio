@@ -1,0 +1,68 @@
+[
+    {
+        "outputFile": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\build\\intermediates\\res\\merged\\debug\\values-v14\\values-v14.xml",
+        "map": [
+            {
+                "to": {
+                    "startLine": 2,
+                    "startColumn": 4,
+                    "startOffset": 55,
+                    "endColumn": 56,
+                    "endOffset": 107
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values-v14\\styles.xml",
+                    "position": {
+                        "startLine": 12,
+                        "startColumn": 4,
+                        "startOffset": 456,
+                        "endColumn": 56,
+                        "endOffset": 508
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 3,
+                    "startColumn": 4,
+                    "startOffset": 112,
+                    "endLine": 6,
+                    "endColumn": 12,
+                    "endOffset": 328
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values-v14\\styles.xml",
+                    "position": {
+                        "startLine": 7,
+                        "startColumn": 4,
+                        "startOffset": 225,
+                        "endLine": 10,
+                        "endColumn": 12,
+                        "endOffset": 444
+                    }
+                }
+            },
+            {
+                "to": {
+                    "startLine": 7,
+                    "startColumn": 4,
+                    "startOffset": 333,
+                    "endLine": 9,
+                    "endColumn": 12,
+                    "endOffset": 506
+                },
+                "from": {
+                    "file": "C:\\Users\\stefan.fink\\StudioProjects\\Dufour\\app\\src\\main\\res\\values-v14\\styles.xml",
+                    "position": {
+                        "startLine": 15,
+                        "startColumn": 4,
+                        "startOffset": 551,
+                        "endLine": 17,
+                        "endColumn": 12,
+                        "endOffset": 726
+                    }
+                }
+            }
+        ]
+    }
+]
