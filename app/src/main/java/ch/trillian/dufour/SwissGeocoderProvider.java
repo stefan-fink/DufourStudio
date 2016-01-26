@@ -21,8 +21,8 @@ import android.util.Log;
 public class SwissGeocoderProvider extends ContentProvider {
 
   private static final String TAG = "GEOCODER";
-  
-  private static final String BASE_URL = "http://api3.geo.admin.ch/rest/services/ech/SearchServer?type=locations&features=&lang=de";
+
+  private static final String BASE_URL = "http://api3.geo.admin.ch/rest/services/ech/SearchServer?type=locations&lang=de";
   private static final String LOCATION_PARAM = "searchText";
   
   @Override
@@ -94,17 +94,18 @@ public class SwissGeocoderProvider extends ContentProvider {
           String origin = attributes.getString("origin");
           String box = attributes.getString("geom_st_box2d");
           String label = attributes.getString("label");
-          
+
+          // skip origins other than gg25 or address
+          if (!"sn25".equals(origin) && !"address".equals(origin)) {
+            continue;
+          }
+
           // parse box
           box = box.replace("BOX(", "");
           box = box.replace(")", "");
           box = box.replace(",", " ");
           String[] coordinates = box.split(" ");
 
-          if (!"sn25".equals(origin) && !"address".equals(origin)) {
-            continue;
-          }
-          
           // get mean value of bounding box
           double x = (Double.valueOf(coordinates[0]) + Double.valueOf(coordinates[2])) / 2d;
           double y = (Double.valueOf(coordinates[1]) + Double.valueOf(coordinates[3])) / 2d;
@@ -119,7 +120,7 @@ public class SwissGeocoderProvider extends ContentProvider {
           label = label.replaceAll("^<b>", "");
           label = label.replaceAll("</b>", "");
           String[] lines = label.split("<b>", 2);
-          
+
           // build result row
           cursor.addRow(new Object[] { i, lines[0] != null ? lines[0] : "", lines.length > 1 && lines[1] != null ? lines[1] : "", uriBuilder.toString() });
             
