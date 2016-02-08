@@ -164,6 +164,13 @@ public class MapView extends View {
     // Create our ScaleGestureDetector
     mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
     mGestureDetector = new GestureDetector(context, new GestureListener());
+
+    // create a default Map
+    String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20140106/21781/%1$s/%3$d/%2$d.jpeg";
+
+    Layer[] layers = { new Layer("CH25", "25", urlFormat, 420000f, 350000f, 1.0f, 256, 256, 0, 0, 1875, 1249) };
+    new Map("Default", layers, 0.5f, 10.0f, 1.5f, 1.5f);
+    layer = layers[0];
   }
 
   private void initPainters() {
