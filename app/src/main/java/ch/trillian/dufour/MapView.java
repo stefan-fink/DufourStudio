@@ -587,7 +587,7 @@ public class MapView extends View {
     paint.setColor(0xFF000000);
     float bitmapScale = height / bitmap.getHeight();
     canvas.scale(bitmapScale, bitmapScale);
-    canvas.drawBitmap(bitmap, x, y / bitmapScale, paint);
+    canvas.drawBitmap(bitmap, x / bitmapScale, y / bitmapScale, paint);
     canvas.restore();
     
     // draw text
