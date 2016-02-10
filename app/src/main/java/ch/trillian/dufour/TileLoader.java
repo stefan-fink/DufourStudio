@@ -54,7 +54,7 @@ public class TileLoader {
 
         public LoaderHandler(TileLoader tileLoader) {
 
-            tileLoaderRef = new WeakReference<TileLoader>(tileLoader);
+            tileLoaderRef = new WeakReference<>(tileLoader);
         }
 
         public void handleMessage(Message message) {
@@ -121,7 +121,7 @@ public class TileLoader {
         private boolean pause;
         private boolean destroy;
         private Thread thread;
-        private ArrayDeque<Tile> queue = new ArrayDeque<Tile>();
+        private final ArrayDeque<Tile> queue = new ArrayDeque<>();
 
         public DatabaseLoader() {
 
@@ -253,7 +253,7 @@ public class TileLoader {
         private boolean pause;
         private boolean destroy;
         private Thread thread;
-        private ArrayDeque<Tile> queue = new ArrayDeque<Tile>();
+        private final ArrayDeque<Tile> queue = new ArrayDeque<>();
 
         public UrlLoader() {
 

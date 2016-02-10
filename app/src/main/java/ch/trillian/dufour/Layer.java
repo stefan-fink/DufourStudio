@@ -3,6 +3,7 @@ package ch.trillian.dufour;
 import android.location.Location;
 
 
+@SuppressWarnings("SameParameterValue")
 public class Layer {
 
     private final String name;
@@ -75,7 +76,7 @@ public class Layer {
         return mapPixel;
     }
 
-    public Location mapPixelTolocation(float mapPixelX, float mapPixelY) {
+    public Location mapPixelToLocation(float mapPixelX, float mapPixelY) {
 
         float x = mapPixelX * meterPerPixel + left;
         float y = top - mapPixelY * meterPerPixel;

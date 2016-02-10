@@ -650,9 +650,7 @@ public class MapView extends View {
         float mapPixelX = centerX / scale - positionX;
         float mapPixelY = centerY / scale - positionY;
 
-        Location location = layer.mapPixelTolocation(mapPixelX, mapPixelY);
-
-        return location;
+        return layer.mapPixelToLocation(mapPixelX, mapPixelY);
     }
 
     public void setPoiLocation(Location location) {
