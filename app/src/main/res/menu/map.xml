@@ -22,7 +22,7 @@
     <item
         android:id="@+id/action_gps"
         android:icon="@drawable/ic_action_gps_off"
-        android:showAsAction="ifRoom"
+        android:showAsAction="always|collapseActionView"
         android:title="@string/action_gps" />
     
 	<item
