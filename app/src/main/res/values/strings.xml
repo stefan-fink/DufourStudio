@@ -14,8 +14,13 @@
     
     <!-- Views -->
     <string name="grid_no_data">no data</string>
-    
+
     <!-- Search strings -->
     <string name="search_hint">Search address</string>
-    
+
+    <!-- Alert strings -->
+    <string name="alert_location_permission_title">Permission denies</string>
+    <string name="alert_location_permission_text">Enable location permission</string>
+    <string name="alert_location_button_ok">OK</string>
+
 </resources>

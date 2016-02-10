@@ -1,10 +1,13 @@
 package ch.trillian.dufour;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -12,6 +15,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -72,8 +76,8 @@ public class MapActivity extends Activity {
         // initialize view
         setContentView(R.layout.activity_map);
         mapView = (MapView) findViewById(R.id.map_view);
-        mapView.setLayer(map.getLayer(0));
-        mapView.setLocation(((LocationManager) getSystemService(Context.LOCATION_SERVICE)).getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        mapView.setLayer(map.getLayer(5));
+        mapView.setLocation(getLastKnownLocation());
         mapView.setViewListener(new MapViewListener());
 
         // retrieve state
@@ -394,6 +398,25 @@ public class MapActivity extends Activity {
         mapView.setGpsTracking(tracking);
     }
 
+    private final Location getLastKnownLocation() {
+
+        Location location;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            double[] cords = Ch1903.ch1903toWgs84to(600000, 200000, 600);
+            location = new Location("Bern");
+            location.setLongitude(cords[0]);
+            location.setLatitude(cords[1]);
+            location.setAltitude(cords[2]);
+        } else {
+            LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+        }
+
+        return location;
+    }
+
+
     private final void setGpsEnabled(boolean enable) {
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -401,8 +424,19 @@ public class MapActivity extends Activity {
 
         // start or stop listening to GPS updates
         if (enable) {
-            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_INTERVAL, GPS_MIN_DISTANCE, locationListener);
-            location = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setMessage(R.string.alert_location_permission_text);
+                builder.setTitle(R.string.alert_location_permission_title);
+                builder.setNeutralButton(R.string.alert_location_button_ok, null);
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                enable = false;
+            } else {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, GPS_MIN_INTERVAL, GPS_MIN_DISTANCE, locationListener);
+                location = getLastKnownLocation();
+            }
         } else {
             locationManager.removeUpdates(locationListener);
         }
