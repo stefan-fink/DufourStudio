@@ -395,12 +395,12 @@ public class MapView extends View {
         return true;
     }
 
-    private final float map2screen(float map, float scale, float position) {
+    private float map2screen(float map, float scale, float position) {
 
         return (position + map) * scale;
     }
 
-    private final float screen2map(float screen, float scale, float position) {
+    private float screen2map(float screen, float scale, float position) {
 
         return screen / scale - position;
     }
@@ -421,7 +421,7 @@ public class MapView extends View {
         drawCross(canvas);
     }
 
-    private final void drawMap(Canvas canvas) {
+    private void drawMap(Canvas canvas) {
 
         // prepare canvas
         canvas.save();
@@ -481,7 +481,7 @@ public class MapView extends View {
         canvas.restore();
     }
 
-    private final void drawPoiPosition(Canvas canvas) {
+    private void drawPoiPosition(Canvas canvas) {
 
         if (poiLocation == null) {
             return;
@@ -507,7 +507,7 @@ public class MapView extends View {
         canvas.restore();
     }
 
-    private final void drawGpsPosition(Canvas canvas) {
+    private void drawGpsPosition(Canvas canvas) {
 
         if (gpsLastLocation == null) {
             return;
@@ -542,7 +542,7 @@ public class MapView extends View {
     }
 
     @SuppressLint("DefaultLocale")
-    private final void drawInfo(Canvas canvas) {
+    private void drawInfo(Canvas canvas) {
 
         if (!showInfo) {
             return;
@@ -572,7 +572,7 @@ public class MapView extends View {
         }
     }
 
-    private final void drawInfoText(Canvas canvas, Bitmap bitmap, String text, float x, float y, float width, float height, int backgroundColor, Paint paint) {
+    private void drawInfoText(Canvas canvas, Bitmap bitmap, String text, float x, float y, float width, float height, int backgroundColor, Paint paint) {
 
         // draw background
         paint.setColor(backgroundColor);
@@ -593,7 +593,7 @@ public class MapView extends View {
         canvas.drawText(text, x + height + paint.descent(), y - paint.ascent() + 0.5f * (height - paint.getFontSpacing()), paint);
     }
 
-    private final void drawCross(Canvas canvas) {
+    private void drawCross(Canvas canvas) {
 
         // draw cross
         canvas.save();

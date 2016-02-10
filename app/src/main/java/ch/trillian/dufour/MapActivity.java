@@ -59,9 +59,6 @@ public class MapActivity extends Activity {
     // our optionMenu
     private Menu optionMenu;
 
-    // the search view
-    private SearchView searchView;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
@@ -150,12 +147,14 @@ public class MapActivity extends Activity {
     @Override
     protected void onResume() {
 
+        Log.w("TRILLIAN", "onResume()");
         super.onResume();
     }
 
     @Override
     protected void onPause() {
 
+        Log.w("TRILLIAN", "onPause()");
         super.onPause();
     }
 
@@ -182,7 +181,7 @@ public class MapActivity extends Activity {
 
         // Get the SearchView and set the searchable configuration
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-        searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
+        SearchView searchView = (SearchView) menu.findItem(R.id.action_search).getActionView();
         searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
         searchView.setIconifiedByDefault(true);
 
@@ -379,7 +378,7 @@ public class MapActivity extends Activity {
         }
     }
 
-    private final void setShowInfo(boolean showInfo) {
+    private void setShowInfo(boolean showInfo) {
 
         this.showInfo = showInfo;
 
@@ -393,12 +392,12 @@ public class MapActivity extends Activity {
         mapView.setShowInfo(showInfo);
     }
 
-    private final void setGpsTracking(boolean tracking) {
+    private void setGpsTracking(boolean tracking) {
 
         mapView.setGpsTracking(tracking);
     }
 
-    private final Location getLastKnownLocation() {
+    private Location getLastKnownLocation() {
 
         Location location;
 
@@ -417,7 +416,7 @@ public class MapActivity extends Activity {
     }
 
 
-    private final void setGpsEnabled(boolean enable) {
+    private void setGpsEnabled(boolean enable) {
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         Location location = null;
@@ -476,7 +475,7 @@ public class MapActivity extends Activity {
 
     private Timer timer;
 
-    private final void startTimer() {
+    private void startTimer() {
 
         timer = new Timer();
         timer.scheduleAtFixedRate(new TimerTask() {
@@ -489,7 +488,7 @@ public class MapActivity extends Activity {
 
     }
 
-    private final void stopTimer() {
+    private void stopTimer() {
 
         timer.cancel();
     }
