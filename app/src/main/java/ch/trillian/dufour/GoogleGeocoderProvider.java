@@ -1,5 +1,6 @@
 package ch.trillian.dufour;
 
+import android.annotation.SuppressLint;
 import android.app.SearchManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -12,6 +13,7 @@ import android.util.Log;
 
 import java.util.List;
 
+@SuppressLint("Registered")
 public class GoogleGeocoderProvider extends ContentProvider {
 
     private static final String TAG = "GEOCODER";
