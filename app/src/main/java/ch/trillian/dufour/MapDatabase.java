@@ -119,9 +119,7 @@ public class MapDatabase extends SQLiteOpenHelper {
 
     public synchronized boolean readTile(Tile tile) {
 
-        Cursor cursor = db.rawQuery(SQL_GET_TILE_IMAGE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())});
-
-        try {
+        try (Cursor cursor = db.rawQuery(SQL_GET_TILE_IMAGE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
             if (cursor.moveToFirst()) {
 
                 tile.setLastUsed(cursor.getLong(0));
@@ -133,8 +131,6 @@ public class MapDatabase extends SQLiteOpenHelper {
                 }
 
             }
-        } finally {
-            cursor.close();
         }
 
         return false;
@@ -144,14 +140,10 @@ public class MapDatabase extends SQLiteOpenHelper {
 
     public boolean isTileExisting(Tile tile) {
 
-        Cursor cursor = db.rawQuery(SQL_EXISTS_TILE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())});
-
-        try {
+        try (Cursor cursor = db.rawQuery(SQL_EXISTS_TILE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
             if (cursor.moveToFirst()) {
                 return true;
             }
-        } finally {
-            cursor.close();
         }
 
         return false;

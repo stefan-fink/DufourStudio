@@ -45,7 +45,7 @@ public class TileLoader {
 
     public interface LoadListener {
 
-        public void onLoadFinished(Tile tile);
+        void onLoadFinished(Tile tile);
     }
 
     private static class LoaderHandler extends Handler {
@@ -70,8 +70,6 @@ public class TileLoader {
             }
         }
     }
-
-    ;
 
     public TileLoader(Context context) {
 
@@ -186,7 +184,7 @@ public class TileLoader {
 
                 while (true) {
 
-                    Tile tile = null;
+                    Tile tile;
 
                     synchronized (queue) {
 
@@ -324,7 +322,7 @@ public class TileLoader {
 
                 while (true) {
 
-                    Tile tile = null;
+                    Tile tile;
 
                     synchronized (queue) {
 

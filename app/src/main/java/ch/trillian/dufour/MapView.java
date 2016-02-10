@@ -21,13 +21,11 @@ public class MapView extends View {
 
     public interface ViewListener {
 
-        public void onSizeChanged(int w, int h, int oldw, int oldh);
+        void onSizeChanged(int w, int h, int oldw, int oldh);
 
-        public Tile onGetTile(Layer layer, int x, int y);
+        Tile onGetTile(Layer layer, int x, int y);
 
-        public void preloadRegion(Layer layer, int minTileX, int maxTileX, int minTileY, int maxTileY);
-
-        // public void gpsIsTracking(boolean isTracking);
+        void preloadRegion(Layer layer, int minTileX, int maxTileX, int minTileY, int maxTileY);
     }
 
     // view listener (our activity)

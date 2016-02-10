@@ -14,9 +14,9 @@ public class TileCache {
 
     public interface CacheListener {
 
-        public void onOrderLoadTile(Tile tile);
+        void onOrderLoadTile(Tile tile);
 
-        public void onCancelLoadTile(Tile tile);
+        void onCancelLoadTile(Tile tile);
     }
 
     public TileCache(Map map, int preloadSize, int screenSizeX, int screenSizeY) {
@@ -110,7 +110,7 @@ public class TileCache {
                     }
 
                     if (tile.isLoading()) {
-                        if ((l != layerIndex) || (l == layerIndex) && (tile.getX() < minTileX || tile.getX() > maxTileX) && (tile.getY() < minTileY || tile.getY() > maxTileY)) {
+                        if ((l != layerIndex) || (tile.getX() < minTileX || tile.getX() > maxTileX) && (tile.getY() < minTileY || tile.getY() > maxTileY)) {
                             cancelLoad(tile);
                             cache[l][y][x] = null;
                         }
