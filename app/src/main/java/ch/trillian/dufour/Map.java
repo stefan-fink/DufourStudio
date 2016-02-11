@@ -4,11 +4,13 @@ public class Map {
 
     private final String name;
     private final Layer[] layers;
+    private TileCache tileCache;
 
     public Map(String name, Layer[] layers, float minScale, float maxScale, float minScaleThreshold, float maxScaleThreshold) {
 
         this.name = name;
         this.layers = layers;
+        this.tileCache = tileCache;
 
         // set layers map and indexes
         for (int i = 0; i < layers.length; i++) {
@@ -42,5 +44,13 @@ public class Map {
 
     public Layer[] getLayers() {
         return layers;
+    }
+
+    public TileCache getTileCache() {
+        return tileCache;
+    }
+
+    public void setTileCache(TileCache tileCache) {
+        this.tileCache = tileCache;
     }
 }

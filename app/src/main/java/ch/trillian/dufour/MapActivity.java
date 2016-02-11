@@ -44,9 +44,8 @@ public class MapActivity extends Activity {
     private static final int GPS_MIN_INTERVAL = 1000;
     private static final int GPS_MIN_DISTANCE = 0;
 
-    private final Map map = createMap();
+    private final Map[] maps = createMaps();
     private MapView mapView;
-    private TileCache tileCache;
     private TileLoader tileLoader;
 
     // true if GPS is enabled
@@ -73,7 +72,7 @@ public class MapActivity extends Activity {
         // initialize view
         setContentView(R.layout.activity_map);
         mapView = (MapView) findViewById(R.id.map_view);
-        mapView.setLayer(map.getLayer(5));
+        mapView.setLayer(maps[0].getLayer(5));
         mapView.setLocation(getLastKnownLocation());
         mapView.setViewListener(new MapViewListener());
 
@@ -83,7 +82,7 @@ public class MapActivity extends Activity {
             Log.w("TRILLIAN", "onCreate(): restore InstanceState");
 
             mapView.setScale(savedInstanceState.getFloat(KEY_SCALE));
-            mapView.setLayer(map.getLayer(savedInstanceState.getInt(KEY_LAYER_INDEX)));
+            mapView.setLayer(maps[0].getLayer(savedInstanceState.getInt(KEY_LAYER_INDEX)));
             mapView.setLocation((Location) savedInstanceState.getParcelable(KEY_LOCATION));
             mapView.setPoiLocation((Location) savedInstanceState.getParcelable(KEY_POI_LOCATION));
             gpsWasEnabled = savedInstanceState.getBoolean(KEY_GPS_ENABLED);
@@ -294,7 +293,7 @@ public class MapActivity extends Activity {
         }
     }
 
-    private Map createMap() {
+    private Map[] createMaps() {
 
         String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20140106/21781/%1$s/%3$d/%2$d.jpeg";
 
@@ -308,7 +307,7 @@ public class MapActivity extends Activity {
                 //new Layer("CH26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
         };
 
-        return new Map("CH", layers, 0.5f, 10.0f, 1.5f, 1.5f);
+        return new Map[]{new Map("CH", layers, 0.5f, 10.0f, 1.5f, 1.5f)};
     }
 
     private class MapViewListener implements MapView.ViewListener {
@@ -320,14 +319,18 @@ public class MapActivity extends Activity {
                 return;
             }
 
-            Log.w("TRILLIAN", "onSizeChanged: " + (tileCache == null ? "no old cache" : "has old cache"));
-
-            tileCache = new TileCache(map, TileCache.PRELOAD_SIZE, w, h);
-            tileCache.setCacheListener(new CacheListener());
+            for (Map map : maps) {
+                Log.w("TRILLIAN", "onSizeChanged: Map=" + map.getName() + (map.getTileCache() == null ? " has no old cache" : " has old cache"));
+                TileCache tileCache = new TileCache(map, TileCache.PRELOAD_SIZE, w, h);
+                tileCache.setCacheListener(new CacheListener());
+                map.setTileCache(tileCache);
+            }
         }
 
         @Override
         public Tile onGetTile(Layer layer, int x, int y) {
+
+            TileCache tileCache = layer.getMap().getTileCache();
 
             if (tileCache == null) {
                 return null;
@@ -338,6 +341,8 @@ public class MapActivity extends Activity {
 
         @Override
         public void preloadRegion(Layer layer, int minTileX, int maxTileX, int minTileY, int maxTileY) {
+
+            TileCache tileCache = layer.getMap().getTileCache();
 
             if (tileCache != null) {
                 tileCache.preloadRegion(layer, minTileX, maxTileX, minTileY, maxTileY);

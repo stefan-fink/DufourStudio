@@ -14,7 +14,7 @@ public class MapDatabase extends SQLiteOpenHelper {
     private static final String TAG = "DATABASE";
 
     private static final String DATABASE_NAME = "map.db";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     // Our singleton
     private static MapDatabase instance;
@@ -115,11 +115,11 @@ public class MapDatabase extends SQLiteOpenHelper {
         return -1;
     }
 
-    private static final String SQL_GET_TILE_IMAGE = "SELECT " + TileTable.COL_LAST_USED + ", " + TileTable.COL_IMAGE + " FROM " + TileTable.TABLE_NAME + " WHERE " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
+    private static final String SQL_GET_TILE_IMAGE = "SELECT " + TileTable.COL_LAST_USED + ", " + TileTable.COL_IMAGE + " FROM " + TileTable.TABLE_NAME + " WHERE " + TileTable.COL_MAP_ID + " = ? AND " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
 
     public synchronized boolean readTile(Tile tile) {
 
-        try (Cursor cursor = db.rawQuery(SQL_GET_TILE_IMAGE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
+        try (Cursor cursor = db.rawQuery(SQL_GET_TILE_IMAGE, new String[]{tile.getLayer().getMap().getName(), tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
             if (cursor.moveToFirst()) {
 
                 tile.setLastUsed(cursor.getLong(0));
@@ -136,11 +136,11 @@ public class MapDatabase extends SQLiteOpenHelper {
         return false;
     }
 
-    private static final String SQL_EXISTS_TILE = "SELECT 1 FROM " + TileTable.TABLE_NAME + " WHERE " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
+    private static final String SQL_EXISTS_TILE = "SELECT 1 FROM " + TileTable.TABLE_NAME + " WHERE " + TileTable.COL_MAP_ID + " = ? AND " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
 
     public boolean isTileExisting(Tile tile) {
 
-        try (Cursor cursor = db.rawQuery(SQL_EXISTS_TILE, new String[]{tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
+        try (Cursor cursor = db.rawQuery(SQL_EXISTS_TILE, new String[]{tile.getLayer().getMap().getName(), tile.getLayer().getName(), String.valueOf(tile.getX()), String.valueOf(tile.getY())})) {
             if (cursor.moveToFirst()) {
                 return true;
             }
@@ -149,7 +149,7 @@ public class MapDatabase extends SQLiteOpenHelper {
         return false;
     }
 
-    private static final String SQL_UPDATE_LAST_USED = "UPDATE " + TileTable.TABLE_NAME + " SET " + TileTable.COL_LAST_USED + "=? WHERE " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
+    private static final String SQL_UPDATE_LAST_USED = "UPDATE " + TileTable.TABLE_NAME + " SET " + TileTable.COL_LAST_USED + "=? WHERE " + TileTable.COL_MAP_ID + " = ? AND "  + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
 
     public synchronized void updateLastUsed(Tile tile) {
 
@@ -159,14 +159,15 @@ public class MapDatabase extends SQLiteOpenHelper {
         updateLastUsedStatement.clearBindings();
         updateLastUsedStatement.bindLong(1, tile.getLastUsed());
         updateLastUsedStatement.bindString(2, tile.getLayer().getName());
-        updateLastUsedStatement.bindLong(3, tile.getX());
-        updateLastUsedStatement.bindLong(4, tile.getY());
+        updateLastUsedStatement.bindString(3, tile.getLayer().getName());
+        updateLastUsedStatement.bindLong(4, tile.getX());
+        updateLastUsedStatement.bindLong(5, tile.getY());
         updateLastUsedStatement.executeUpdateDelete();
 
         Log.i(TAG, String.format("Updated last-used in %d ms", (System.currentTimeMillis() - start)));
     }
 
-    private static final String SQL_UPDATE_BITMAP = "UPDATE " + TileTable.TABLE_NAME + " SET " + TileTable.COL_LAST_USED + "=?," + TileTable.COL_IMAGE + "=? WHERE " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
+    private static final String SQL_UPDATE_BITMAP = "UPDATE " + TileTable.TABLE_NAME + " SET " + TileTable.COL_LAST_USED + "=?," + TileTable.COL_IMAGE + "=? WHERE " + TileTable.COL_MAP_ID + " = ? AND " + TileTable.COL_LAYER_ID + " = ? AND " + TileTable.COL_X + " = ? AND " + TileTable.COL_Y + "=?";
 
     public synchronized void updateBitmap(Tile tile, byte[] image) {
 
@@ -176,15 +177,16 @@ public class MapDatabase extends SQLiteOpenHelper {
         statement.clearBindings();
         statement.bindLong(1, tile.getLastUsed());
         statement.bindBlob(2, image);
-        statement.bindString(3, tile.getLayer().getName());
-        statement.bindLong(4, tile.getX());
-        statement.bindLong(5, tile.getY());
+        statement.bindString(3, tile.getLayer().getMap().getName());
+        statement.bindString(4, tile.getLayer().getName());
+        statement.bindLong(5, tile.getX());
+        statement.bindLong(6, tile.getY());
         statement.executeUpdateDelete();
 
         Log.i(TAG, String.format("Updated bitmap in %d ms", (System.currentTimeMillis() - start)));
     }
 
-    private static final String SQL_INSERT_TILE = "INSERT INTO " + TileTable.TABLE_NAME + " (" + TileTable.COL_LAYER_ID + "," + TileTable.COL_X + "," + TileTable.COL_Y + "," + TileTable.COL_LAST_USED + "," + TileTable.COL_IMAGE + ") VALUES(?,?,?,?,?)";
+    private static final String SQL_INSERT_TILE = "INSERT INTO " + TileTable.TABLE_NAME + " (" + TileTable.COL_MAP_ID + "," + TileTable.COL_LAYER_ID + "," + TileTable.COL_X + "," + TileTable.COL_Y + "," + TileTable.COL_LAST_USED + "," + TileTable.COL_IMAGE + ") VALUES(?,?,?,?,?,?)";
 
     public synchronized void insertTile(Tile tile, byte[] image) {
 
@@ -192,11 +194,12 @@ public class MapDatabase extends SQLiteOpenHelper {
 
         SQLiteStatement statement = db.compileStatement(SQL_INSERT_TILE);
         statement.clearBindings();
-        statement.bindString(1, tile.getLayer().getName());
-        statement.bindLong(2, tile.getX());
-        statement.bindLong(3, tile.getY());
-        statement.bindLong(4, tile.getLastUsed());
-        statement.bindBlob(5, image);
+        statement.bindString(1, tile.getLayer().getMap().getName());
+        statement.bindString(2, tile.getLayer().getName());
+        statement.bindLong(3, tile.getX());
+        statement.bindLong(4, tile.getY());
+        statement.bindLong(5, tile.getLastUsed());
+        statement.bindBlob(6, image);
         if (statement.executeInsert() >= 0) {
             tileCount++;
         }
