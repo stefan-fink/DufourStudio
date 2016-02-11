@@ -86,7 +86,13 @@ public class MapView extends View {
     // x = pixelX / scale - positionX
     private float positionX = 0f;
     private float positionY = 0f;
-    private float scale = 1f;
+    // private float scale = 1f;
+
+    // new way
+    // mapScale = layer.getMeterPerPixel() / meterPerPixel
+    private float meterPerPixel;
+    private float meterX;
+    private float meterY;
 
     // min and max coordinates of tiles on screen
     private int minTileX;
@@ -195,16 +201,6 @@ public class MapView extends View {
         crossPaint.setStrokeWidth(crossStroke);
     }
 
-    public float getScale() {
-
-        return scale;
-    }
-
-    public void setScale(float newScale) {
-
-        scale(newScale / scale);
-    }
-
     public void scale(float scaleFactor) {
 
         scale(scaleFactor, (float) screenSizeX / 2, (float) screenSizeY / 2);
@@ -212,31 +208,34 @@ public class MapView extends View {
 
     public void scale(float scaleFactor, float focusScreenX, float focusScreenY) {
 
-        float newScale = scale * scaleFactor;
+        float oldScale = layer.getMeterPerPixel() / meterPerPixel;
+
+        float newMeterPerPixel = meterPerPixel / scaleFactor;
+        float newMapScale = layer.getMeterPerPixel() / newMeterPerPixel;
 
         // focal point in map-pixels
-        float focusMapX = screen2map(focusScreenX, scale, positionX);
-        float focusMapY = screen2map(focusScreenY, scale, positionY);
+        float focusMapX = screen2map(focusScreenX, oldScale, positionX);
+        float focusMapY = screen2map(focusScreenY, oldScale, positionY);
 
-        if (newScale > layer.getMaxScale()) {
+        if (newMapScale > layer.getMaxScale()) {
 
             // try to zoom layer in
             Layer newLayer = layer.getLayerIn();
             if (newLayer != null) {
                 float scaleRatio = newLayer.getMeterPerPixel() / layer.getMeterPerPixel();
-                newScale *= scaleRatio;
+                newMapScale *= scaleRatio;
                 focusMapX /= scaleRatio;
                 focusMapY /= scaleRatio;
                 layer = newLayer;
             }
 
-        } else if (newScale < layer.getMinScale()) {
+        } else if (newMapScale < layer.getMinScale()) {
 
             // try to zoom layer out
             Layer newLayer = layer.getLayerOut();
             if (newLayer != null) {
                 float scaleRatio = newLayer.getMeterPerPixel() / layer.getMeterPerPixel();
-                newScale = newScale * scaleRatio;
+                newMapScale *= scaleRatio;
                 focusMapX /= scaleRatio;
                 focusMapY /= scaleRatio;
                 layer = newLayer;
@@ -244,12 +243,13 @@ public class MapView extends View {
         }
 
         // Don't let the object get too small or too large.
-        newScale = Math.max(layer.getMinScale(), Math.min(newScale, layer.getMaxScale()));
+        newMapScale = Math.max(layer.getMinScale(), Math.min(newMapScale, layer.getMaxScale()));
 
-        positionX = focusScreenX / newScale - focusMapX;
-        positionY = focusScreenY / newScale - focusMapY;
+        positionX = focusScreenX / newMapScale - focusMapX;
+        positionY = focusScreenY / newMapScale - focusMapY;
 
-        scale = newScale;
+        meterPerPixel = layer.getMeterPerPixel() / newMapScale;
+        Log.w("TRILLIAN", String.format("meterPerPixel: %f, scale: %f", meterPerPixel, newMapScale));
 
         invalidate();
     }
@@ -291,6 +291,8 @@ public class MapView extends View {
 
         float centerXnew = (float) w / 2f;
         float centerYnew = (float) h / 2f;
+
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
 
         positionX = (centerXnew - centerX + positionX * scale) / scale;
         positionY = (centerYnew - centerY + positionY * scale) / scale;
@@ -345,6 +347,7 @@ public class MapView extends View {
                     final float dy = y - lastTouchY;
 
                     // move the viewport
+                    float scale = layer.getMeterPerPixel() / meterPerPixel;
                     positionX += dx / scale;
                     positionY += dy / scale;
 
@@ -424,6 +427,7 @@ public class MapView extends View {
     private void drawMap(Canvas canvas) {
 
         // prepare canvas
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         canvas.save();
         canvas.scale(scale, scale);
         canvas.translate(positionX, positionY);
@@ -489,6 +493,7 @@ public class MapView extends View {
 
         // get coordinates of POI position in screen pixels
         float[] mapPixel = layer.locationToMapPixel(poiLocation);
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         float x = map2screen(mapPixel[0], scale, positionX);
         float y = map2screen(mapPixel[1], scale, positionY);
 
@@ -515,6 +520,7 @@ public class MapView extends View {
 
         // get coordinates of GPS position in screen pixels
         float[] mapPixel = layer.locationToMapPixel(gpsLastLocation);
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         float x = map2screen(mapPixel[0], scale, positionX);
         float y = map2screen(mapPixel[1], scale, positionY);
 
@@ -551,6 +557,7 @@ public class MapView extends View {
         float lineHeight = infoPaint.getFontSpacing() * 1.3f;
 
         // draw coordinates
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         String[] displayCoordinates = layer.getDisplayCoordinates(screen2map(centerX, scale, positionX), screen2map(centerY, scale, positionY));
         String text = String.format("%s, %s (%1.2f@%s)", displayCoordinates[0], displayCoordinates[1], scale, layer.getName());
         drawInfoText(canvas, infoLocationBitmap, text, 0f, 0f, screenSizeX, lineHeight, infoBackColor, infoPaint);
@@ -607,6 +614,7 @@ public class MapView extends View {
     private void updateTilesMinMax() {
 
         // calculate new tile-region
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         int minTileXnew = (int) Math.floor(-positionX / layer.getTileSizeX());
         int maxTileXnew = (int) Math.floor((screenSizeX / scale - positionX) / layer.getTileSizeX());
         int minTileYnew = (int) Math.floor(-positionY / layer.getTileSizeY());
@@ -637,6 +645,7 @@ public class MapView extends View {
         Log.w("TRILLIAN", String.format("setLocation: %f, %f", location.getLongitude(), location.getLatitude()));
 
         float[] mapPixel = layer.locationToMapPixel(location);
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         positionX = centerX / scale - mapPixel[0];
         positionY = centerY / scale - mapPixel[1];
 
@@ -645,6 +654,7 @@ public class MapView extends View {
 
     public Location getLocation() {
 
+        float scale = layer.getMeterPerPixel() / meterPerPixel;
         float mapPixelX = centerX / scale - positionX;
         float mapPixelY = centerY / scale - positionY;
 
@@ -744,9 +754,11 @@ public class MapView extends View {
         return layer;
     }
 
-    public void setLayer(Layer layer) {
+    public void setLayer(Layer layer, float meterPerPixel) {
 
         this.layer = layer;
+
+        this.meterPerPixel = meterPerPixel;
 
         invalidate();
     }
@@ -761,5 +773,9 @@ public class MapView extends View {
         this.showInfo = showInfo;
 
         invalidate();
+    }
+
+    public float getMeterPerPixel() {
+        return meterPerPixel;
     }
 }
