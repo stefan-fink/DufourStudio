@@ -81,20 +81,13 @@ public class MapView extends View {
     private float centerX;
     private float centerY;
 
-    // position and zoom (position is in mapPixels)
-    // pixelX = (positionX + x) * scale
-    // x = pixelX / scale - positionX
-    private float positionX = 0f;
-    private float positionY = 0f;
-    // private float scale = 1f;
-
-    // new way
-    // mapScale = layer.getMeterPerPixel() / meterPerPixel
+    // meterX/meterY are CH1903 coordinates of the left upper corner
     private float meterPerPixel;
     private float meterX;
     private float meterY;
 
     // min and max coordinates of tiles on screen
+    // TODO: these are layer dependent and must be in a layer dependent structure
     private int minTileX;
     private int maxTileX;
     private int minTileY;
@@ -206,54 +199,52 @@ public class MapView extends View {
         scale(scaleFactor, (float) screenSizeX / 2, (float) screenSizeY / 2);
     }
 
-    public void scale(float scaleFactor, float focusScreenX, float focusScreenY) {
+    private void move(float dx, float dy) {
 
-        float oldScale = layer.getMeterPerPixel() / meterPerPixel;
+        meterX -= dx * meterPerPixel;
+        meterY += dy * meterPerPixel;
 
-        float newMeterPerPixel = meterPerPixel / scaleFactor;
-        float newMapScale = layer.getMeterPerPixel() / newMeterPerPixel;
+        // disable gps tracking if we moved too far away from GPS location
+        if (gpsLastLocation != null && gpsTracking) {
 
-        // focal point in map-pixels
-        float focusMapX = screen2map(focusScreenX, oldScale, positionX);
-        float focusMapY = screen2map(focusScreenY, oldScale, positionY);
-
-        if (newMapScale > layer.getMaxScale()) {
-
-            // try to zoom layer in
-            Layer newLayer = layer.getLayerIn();
-            if (newLayer != null) {
-                float scaleRatio = newLayer.getMeterPerPixel() / layer.getMeterPerPixel();
-                newMapScale *= scaleRatio;
-                focusMapX /= scaleRatio;
-                focusMapY /= scaleRatio;
-                layer = newLayer;
-            }
-
-        } else if (newMapScale < layer.getMinScale()) {
-
-            // try to zoom layer out
-            Layer newLayer = layer.getLayerOut();
-            if (newLayer != null) {
-                float scaleRatio = newLayer.getMeterPerPixel() / layer.getMeterPerPixel();
-                newMapScale *= scaleRatio;
-                focusMapX /= scaleRatio;
-                focusMapY /= scaleRatio;
-                layer = newLayer;
+            // calculate delta in screen pixels from gpsLastLocation to screen center
+            double[] gpsLastLocationCh1903 = Ch1903.wgs84toCh1903(gpsLastLocation);
+            float deltaX = ((float) gpsLastLocationCh1903[1] - meterX) / meterPerPixel - centerX;
+            float deltaY = (meterY - (float) gpsLastLocationCh1903[0]) / meterPerPixel - centerY;
+            float deltaSquare = deltaX * deltaX + deltaY * deltaY;
+            float gpsTrackDistance = Math.min(screenSizeX, screenSizeY) / 10;
+            if (deltaSquare > gpsTrackDistance * gpsTrackDistance) {
+                setGpsTracking(false);
             }
         }
-
-        // Don't let the object get too small or too large.
-        newMapScale = Math.max(layer.getMinScale(), Math.min(newMapScale, layer.getMaxScale()));
-
-        positionX = focusScreenX / newMapScale - focusMapX;
-        positionY = focusScreenY / newMapScale - focusMapY;
-
-        meterPerPixel = layer.getMeterPerPixel() / newMapScale;
-        Log.w("TRILLIAN", String.format("meterPerPixel: %f, scale: %f", meterPerPixel, newMapScale));
 
         invalidate();
     }
 
+    public void scale(float scaleFactor, float focusScreenX, float focusScreenY) {
+
+        // calculate focus in CH1903
+        float focusMeterX = meterX + focusScreenX * meterPerPixel;
+        float focusMeterY = meterY - focusScreenY * meterPerPixel;
+
+        // calculate new meterPerPixel
+        // TODO: replace min/max by better code
+        meterPerPixel = meterPerPixel / scaleFactor;
+        meterPerPixel = Math.min(meterPerPixel, 250f * 1.5f);
+        meterPerPixel = Math.max(meterPerPixel, 1.0f * 0.1f);
+
+        // calculate new meterX / meterY
+        meterX = focusMeterX - focusScreenX * meterPerPixel;
+        meterY = focusMeterY + focusScreenY * meterPerPixel;
+
+        // maybe layer changed
+        // TODO: loop over all layers
+        layer = layer.getMap().getMatchingLayer(layer, meterPerPixel);
+
+        Log.w("TRILLIAN", String.format("scale() meterPerPixel: %f, meterX: %f, meterY: %f, layer.getMeterPerPixel: %f", meterPerPixel, meterX, meterY, layer.getMeterPerPixel()));
+
+        invalidate();
+    }
 
     private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
         @Override
@@ -289,19 +280,20 @@ public class MapView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 
-        float centerXnew = (float) w / 2f;
-        float centerYnew = (float) h / 2f;
+        float newCenterX = (float) w / 2f;
+        float newCenterY = (float) h / 2f;
 
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
+        float oldMeterCenterX = meterX + centerX * meterPerPixel;
+        float oldMeterCenterY = meterY - centerY * meterPerPixel;
 
-        positionX = (centerXnew - centerX + positionX * scale) / scale;
-        positionY = (centerYnew - centerY + positionY * scale) / scale;
+        meterX = oldMeterCenterX - newCenterX * meterPerPixel;
+        meterY = oldMeterCenterY + newCenterY * meterPerPixel;
 
         screenSizeX = w;
         screenSizeY = h;
 
-        centerX = centerXnew;
-        centerY = centerYnew;
+        centerX = newCenterX;
+        centerY = newCenterY;
 
         if (viewListener != null) {
             viewListener.onSizeChanged(w, h, oldw, oldh);
@@ -347,25 +339,7 @@ public class MapView extends View {
                     final float dy = y - lastTouchY;
 
                     // move the viewport
-                    float scale = layer.getMeterPerPixel() / meterPerPixel;
-                    positionX += dx / scale;
-                    positionY += dy / scale;
-
-                    // disable gps tracking if we moved too far away from GPS location
-                    if (gpsLastLocation != null && gpsTracking) {
-
-                        // calculate screen pixel coordinates of GPS location
-                        float[] mapPixel = layer.locationToMapPixel(gpsLastLocation);
-                        float deltaX = map2screen(mapPixel[0], scale, positionX) - centerX;
-                        float deltaY = map2screen(mapPixel[1], scale, positionY) - centerY;
-                        float deltaSquare = deltaX * deltaX + deltaY * deltaY;
-                        float gpsTrackDistance = Math.min(screenSizeX, screenSizeX) / 10;
-                        if (deltaSquare > gpsTrackDistance * gpsTrackDistance) {
-                            setGpsTracking(false);
-                        }
-                    }
-
-                    invalidate();
+                    move(dx, dy);
                 }
 
                 // Remember this touch position for the next move event
@@ -428,9 +402,11 @@ public class MapView extends View {
 
         // prepare canvas
         float scale = layer.getMeterPerPixel() / meterPerPixel;
+        float deltaPixelX = (meterX - layer.getLeft()) / meterPerPixel;
+        float deltaPixelY = (layer.getTop() - meterY) / meterPerPixel;
         canvas.save();
+        canvas.translate(-deltaPixelX, -deltaPixelY);
         canvas.scale(scale, scale);
-        canvas.translate(positionX, positionY);
 
         // order tiles to draw
         updateTilesMinMax();
@@ -492,10 +468,9 @@ public class MapView extends View {
         }
 
         // get coordinates of POI position in screen pixels
-        float[] mapPixel = layer.locationToMapPixel(poiLocation);
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        float x = map2screen(mapPixel[0], scale, positionX);
-        float y = map2screen(mapPixel[1], scale, positionY);
+        double[] ch1903 = Ch1903.wgs84toCh1903(poiLocation);
+        float x = ((float) ch1903[1] - meterX) / meterPerPixel;
+        float y = (meterY - (float) ch1903[0]) / meterPerPixel;
 
         // prepare canvas
         canvas.save();
@@ -519,10 +494,9 @@ public class MapView extends View {
         }
 
         // get coordinates of GPS position in screen pixels
-        float[] mapPixel = layer.locationToMapPixel(gpsLastLocation);
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        float x = map2screen(mapPixel[0], scale, positionX);
-        float y = map2screen(mapPixel[1], scale, positionY);
+        double[] ch1903 = Ch1903.wgs84toCh1903(gpsLastLocation);
+        float x = ((float) ch1903[1] - meterX) / meterPerPixel;
+        float y = (meterY - (float) ch1903[0]) / meterPerPixel;
 
         // prepare canvas
         canvas.save();
@@ -530,7 +504,7 @@ public class MapView extends View {
 
         // draw accuracy
         if (gpsLastLocation.hasAccuracy()) {
-            float accuracySize = gpsLastLocation.getAccuracy() / layer.getMeterPerPixel() * scale;
+            float accuracySize = gpsLastLocation.getAccuracy() / meterPerPixel;
             gpsPaint.setColor(gpsPosAccuracyColor);
             gpsPaint.setStyle(Paint.Style.FILL);
             canvas.drawCircle(0, 0, accuracySize, gpsPaint);
@@ -557,9 +531,10 @@ public class MapView extends View {
         float lineHeight = infoPaint.getFontSpacing() * 1.3f;
 
         // draw coordinates
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        String[] displayCoordinates = layer.getDisplayCoordinates(screen2map(centerX, scale, positionX), screen2map(centerY, scale, positionY));
-        String text = String.format("%s, %s (%1.2f@%s)", displayCoordinates[0], displayCoordinates[1], scale, layer.getName());
+        float ch1903X = meterX + centerX * meterPerPixel;
+        float ch1903Y = meterY + centerY * meterPerPixel;
+
+        String text = String.format("%6.0f, %6.0f (%1.2f mpp)", ch1903X, ch1903Y, meterPerPixel);
         drawInfoText(canvas, infoLocationBitmap, text, 0f, 0f, screenSizeX, lineHeight, infoBackColor, infoPaint);
 
         // draw GPS details
@@ -614,11 +589,10 @@ public class MapView extends View {
     private void updateTilesMinMax() {
 
         // calculate new tile-region
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        int minTileXnew = (int) Math.floor(-positionX / layer.getTileSizeX());
-        int maxTileXnew = (int) Math.floor((screenSizeX / scale - positionX) / layer.getTileSizeX());
-        int minTileYnew = (int) Math.floor(-positionY / layer.getTileSizeY());
-        int maxTileYnew = (int) Math.floor((screenSizeY / scale - positionY) / layer.getTileSizeY());
+        int minTileXnew = (int) Math.floor((meterX - layer.getLeft()) / layer.getMeterPerPixel() / layer.getTileSizeX());
+        int maxTileXnew = (int) Math.floor((meterX + screenSizeX * meterPerPixel - layer.getLeft()) / layer.getMeterPerPixel() / layer.getTileSizeX());
+        int minTileYnew = (int) Math.floor((layer.getTop()- meterY) / layer.getMeterPerPixel() / layer.getTileSizeY());
+        int maxTileYnew = (int) Math.floor((layer.getTop()- meterY + screenSizeY * meterPerPixel) / layer.getMeterPerPixel() / layer.getTileSizeY());
 
         // remember new values and preload new region
         if (minTileXnew != minTileX || maxTileXnew != maxTileX || minTileYnew != minTileY || maxTileYnew != maxTileY) {
@@ -644,21 +618,26 @@ public class MapView extends View {
 
         Log.w("TRILLIAN", String.format("setLocation: %f, %f", location.getLongitude(), location.getLatitude()));
 
-        float[] mapPixel = layer.locationToMapPixel(location);
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        positionX = centerX / scale - mapPixel[0];
-        positionY = centerY / scale - mapPixel[1];
+        double[] ch1903 = Ch1903.wgs84toCh1903(location);
+
+        meterX = (float) ch1903[1] - centerX * meterPerPixel;
+        meterY = (float) ch1903[0] + centerY * meterPerPixel;
 
         invalidate();
     }
 
     public Location getLocation() {
 
-        float scale = layer.getMeterPerPixel() / meterPerPixel;
-        float mapPixelX = centerX / scale - positionX;
-        float mapPixelY = centerY / scale - positionY;
+        float x = meterX + centerX * meterPerPixel;
+        float y = meterY - centerY * meterPerPixel;
 
-        return layer.mapPixelToLocation(mapPixelX, mapPixelY);
+        double[] wgs84 = Ch1903.ch1903toWgs84to(x, y, 600f);
+
+        Location location = new Location("Dufour");
+        location.setLongitude(wgs84[0]);
+        location.setLatitude(wgs84[1]);
+
+        return location;
     }
 
     public void setPoiLocation(Location location) {

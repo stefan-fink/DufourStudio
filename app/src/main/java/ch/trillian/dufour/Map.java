@@ -1,5 +1,7 @@
 package ch.trillian.dufour;
 
+import android.util.Log;
+
 public class Map {
 
     private final String name;
@@ -36,6 +38,29 @@ public class Map {
     public Layer getLayer(int layerIndex) {
 
         return layers[layerIndex];
+    }
+
+    public Layer getMatchingLayer(Layer actualLayer, float meterPerPixel) {
+
+        Log.w("TRILLIAN", String.format("scale() meterPerPixel: %f, actualLayer.getMeterPerPixel: %f, actualLayer.getMinScale: %f, actualLayer.getMaxScale: %f", meterPerPixel, actualLayer.getMeterPerPixel(), actualLayer.getMinScale(), actualLayer.getMaxScale()));
+
+        // return actual layer if it still matches
+        float scale = actualLayer.getMeterPerPixel() / meterPerPixel;
+        if (scale >= actualLayer.getMinScale() && scale <= actualLayer.getMaxScale()) {
+            return actualLayer;
+        }
+
+        // find first matching layer
+        // TODO: should find best match, not first one
+        for (Layer layer : layers) {
+            scale = layer.getMeterPerPixel() / meterPerPixel;
+            if (scale >= layer.getMinScale() && scale <= layer.getMaxScale()) {
+                return layer;
+            }
+        }
+
+        // TODO: should return nothing
+        return actualLayer;
     }
 
     public String getName() {

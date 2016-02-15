@@ -157,9 +157,11 @@ public class Layer {
         return name;
     }
 
-    public int getTileSizeX() {
-        return tileSizeX;
-    }
+    public float getLeft() { return left; }
+
+    public float getTop() { return top; }
+
+    public int getTileSizeX() { return tileSizeX; }
 
     public int getTileSizeY() {
         return tileSizeY;
