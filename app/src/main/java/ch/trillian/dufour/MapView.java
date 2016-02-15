@@ -194,9 +194,20 @@ public class MapView extends View {
         crossPaint.setStrokeWidth(crossStroke);
     }
 
+
+    private float ch1903ToScreenX(float ch1903X) {
+
+        return (ch1903X - meterX) / meterPerPixel;
+    }
+
+    private float ch1903ToScreenY(float ch1903Y) {
+
+        return (meterY - ch1903Y) / meterPerPixel;
+    }
+
     public void scale(float scaleFactor) {
 
-        scale(scaleFactor, (float) screenSizeX / 2, (float) screenSizeY / 2);
+        scale(scaleFactor, centerX, centerY);
     }
 
     private void move(float dx, float dy) {
@@ -209,8 +220,8 @@ public class MapView extends View {
 
             // calculate delta in screen pixels from gpsLastLocation to screen center
             double[] gpsLastLocationCh1903 = Ch1903.wgs84toCh1903(gpsLastLocation);
-            float deltaX = ((float) gpsLastLocationCh1903[1] - meterX) / meterPerPixel - centerX;
-            float deltaY = (meterY - (float) gpsLastLocationCh1903[0]) / meterPerPixel - centerY;
+            float deltaX = ch1903ToScreenX((float) gpsLastLocationCh1903[1]) - centerX;
+            float deltaY = ch1903ToScreenY((float) gpsLastLocationCh1903[0]) - centerY;
             float deltaSquare = deltaX * deltaX + deltaY * deltaY;
             float gpsTrackDistance = Math.min(screenSizeX, screenSizeY) / 10;
             if (deltaSquare > gpsTrackDistance * gpsTrackDistance) {
@@ -469,8 +480,8 @@ public class MapView extends View {
 
         // get coordinates of POI position in screen pixels
         double[] ch1903 = Ch1903.wgs84toCh1903(poiLocation);
-        float x = ((float) ch1903[1] - meterX) / meterPerPixel;
-        float y = (meterY - (float) ch1903[0]) / meterPerPixel;
+        float x = ch1903ToScreenX((float) ch1903[1]);
+        float y = ch1903ToScreenY((float) ch1903[0]);
 
         // prepare canvas
         canvas.save();
@@ -495,8 +506,8 @@ public class MapView extends View {
 
         // get coordinates of GPS position in screen pixels
         double[] ch1903 = Ch1903.wgs84toCh1903(gpsLastLocation);
-        float x = ((float) ch1903[1] - meterX) / meterPerPixel;
-        float y = (meterY - (float) ch1903[0]) / meterPerPixel;
+        float x = ch1903ToScreenX((float) ch1903[1]);
+        float y = ch1903ToScreenY((float) ch1903[0]);
 
         // prepare canvas
         canvas.save();
