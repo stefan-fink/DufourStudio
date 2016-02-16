@@ -194,7 +194,6 @@ public class MapView extends View {
         crossPaint.setStrokeWidth(crossStroke);
     }
 
-
     private float ch1903ToScreenX(float ch1903X) {
 
         return (ch1903X - meterX) / meterPerPixel;
@@ -203,6 +202,16 @@ public class MapView extends View {
     private float ch1903ToScreenY(float ch1903Y) {
 
         return (meterY - ch1903Y) / meterPerPixel;
+    }
+
+    private float screenToCh1903X(float screenX) {
+
+        return meterX + screenX * meterPerPixel;
+    }
+
+    private float screenToCh1903Y(float screenY) {
+
+        return meterY - screenY * meterPerPixel;
     }
 
     public void scale(float scaleFactor) {
@@ -235,8 +244,8 @@ public class MapView extends View {
     public void scale(float scaleFactor, float focusScreenX, float focusScreenY) {
 
         // calculate focus in CH1903
-        float focusMeterX = meterX + focusScreenX * meterPerPixel;
-        float focusMeterY = meterY - focusScreenY * meterPerPixel;
+        float focusCh1903X = screenToCh1903X(focusScreenX);
+        float focusCh1903Y = screenToCh1903Y(focusScreenY);
 
         // calculate new meterPerPixel
         // TODO: replace min/max by better code
@@ -245,8 +254,8 @@ public class MapView extends View {
         meterPerPixel = Math.max(meterPerPixel, 1.0f * 0.1f);
 
         // calculate new meterX / meterY
-        meterX = focusMeterX - focusScreenX * meterPerPixel;
-        meterY = focusMeterY + focusScreenY * meterPerPixel;
+        meterX = focusCh1903X - focusScreenX * meterPerPixel;
+        meterY = focusCh1903Y + focusScreenY * meterPerPixel;
 
         // maybe layer changed
         // TODO: loop over all layers
@@ -291,20 +300,16 @@ public class MapView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
 
-        float newCenterX = (float) w / 2f;
-        float newCenterY = (float) h / 2f;
+        float oldCenterCh1903X = screenToCh1903X(centerX);
+        float oldCenterCh1903Y = screenToCh1903Y(centerY);
 
-        float oldMeterCenterX = meterX + centerX * meterPerPixel;
-        float oldMeterCenterY = meterY - centerY * meterPerPixel;
-
-        meterX = oldMeterCenterX - newCenterX * meterPerPixel;
-        meterY = oldMeterCenterY + newCenterY * meterPerPixel;
-
+        centerX = (float) w / 2f;
+        centerY = (float) h / 2f;
         screenSizeX = w;
         screenSizeY = h;
 
-        centerX = newCenterX;
-        centerY = newCenterY;
+        meterX = oldCenterCh1903X - centerX * meterPerPixel;
+        meterY = oldCenterCh1903Y + centerY * meterPerPixel;
 
         if (viewListener != null) {
             viewListener.onSizeChanged(w, h, oldw, oldh);
@@ -542,8 +547,8 @@ public class MapView extends View {
         float lineHeight = infoPaint.getFontSpacing() * 1.3f;
 
         // draw coordinates
-        float ch1903X = meterX + centerX * meterPerPixel;
-        float ch1903Y = meterY + centerY * meterPerPixel;
+        float ch1903X = screenToCh1903X(centerX);
+        float ch1903Y = screenToCh1903Y(centerY);
 
         String text = String.format("%6.0f, %6.0f (%1.2f mpp)", ch1903X, ch1903Y, meterPerPixel);
         drawInfoText(canvas, infoLocationBitmap, text, 0f, 0f, screenSizeX, lineHeight, infoBackColor, infoPaint);
@@ -639,8 +644,8 @@ public class MapView extends View {
 
     public Location getLocation() {
 
-        float x = meterX + centerX * meterPerPixel;
-        float y = meterY - centerY * meterPerPixel;
+        float x = screenToCh1903X(centerX);
+        float y = screenToCh1903Y(centerY);
 
         double[] wgs84 = Ch1903.ch1903toWgs84to(x, y, 600f);
 
