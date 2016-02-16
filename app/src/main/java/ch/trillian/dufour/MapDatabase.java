@@ -14,7 +14,7 @@ public class MapDatabase extends SQLiteOpenHelper {
     private static final String TAG = "DATABASE";
 
     private static final String DATABASE_NAME = "map.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     // Our singleton
     private static MapDatabase instance;
@@ -123,13 +123,18 @@ public class MapDatabase extends SQLiteOpenHelper {
             if (cursor.moveToFirst()) {
 
                 tile.setLastUsed(cursor.getLong(0));
+                tile.setOK();
+                tile.setBitmap(null);
+
                 byte[] encodedImage = cursor.getBlob(1);
-                Bitmap bitmap = BitmapFactory.decodeByteArray(encodedImage, 0, encodedImage.length);
-                if (bitmap != null) {
-                    tile.setBitmap(bitmap);
-                    return true;
+                if (encodedImage != null) {
+                    Bitmap bitmap = BitmapFactory.decodeByteArray(encodedImage, 0, encodedImage.length);
+                    if (bitmap != null) {
+                        tile.setBitmap(bitmap);
+                    }
                 }
 
+                return true;
             }
         }
 
@@ -176,7 +181,11 @@ public class MapDatabase extends SQLiteOpenHelper {
         SQLiteStatement statement = db.compileStatement(SQL_UPDATE_BITMAP);
         statement.clearBindings();
         statement.bindLong(1, tile.getLastUsed());
-        statement.bindBlob(2, image);
+        if (image == null) {
+            statement.bindNull(2);
+        } else {
+            statement.bindBlob(2, image);
+        }
         statement.bindString(3, tile.getLayer().getMap().getName());
         statement.bindString(4, tile.getLayer().getName());
         statement.bindLong(5, tile.getX());
@@ -199,7 +208,11 @@ public class MapDatabase extends SQLiteOpenHelper {
         statement.bindLong(3, tile.getX());
         statement.bindLong(4, tile.getY());
         statement.bindLong(5, tile.getLastUsed());
-        statement.bindBlob(6, image);
+        if (image == null) {
+            statement.bindNull(6);
+        } else {
+            statement.bindBlob(6, image);
+        }
         if (statement.executeInsert() >= 0) {
             tileCount++;
         }

@@ -428,11 +428,13 @@ public class MapView extends View {
                 if (viewListener != null) {
                     Tile tile = viewListener.onGetTile(layer, i, j);
                     if (tile != null) {
-                        Bitmap bitmap = tile.getBitmap();
-                        if (bitmap != null) {
-                            canvas.drawBitmap(bitmap, x, y, mapPaint);
+                        if (tile.isOk()) {
+                            Bitmap bitmap = tile.getBitmap();
+                            if (bitmap != null) {
+                                canvas.drawBitmap(bitmap, x, y, mapPaint);
+                            }
                         } else {
-                            bitmap = tile.isLoading() ? tileLoadingBitmap : tileLoadFailedBitmap;
+                            Bitmap bitmap = tile.isLoading() ? tileLoadingBitmap : tileLoadFailedBitmap;
                             canvas.drawBitmap(bitmap, x + (incX - bitmap.getWidth()) / 2, y + (incY - bitmap.getHeight()) / 2, mapPaint);
                         }
                     }

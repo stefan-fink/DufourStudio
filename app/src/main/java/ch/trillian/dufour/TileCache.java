@@ -85,6 +85,7 @@ public class TileCache {
         // order new tile if none exists
         if (tile == null) {
             tile = new Tile(layer, x, y);
+            tile.setLoading();
             cache[layerIndex][cacheIndexY][cacheIndexX] = tile;
             orderLoad(tile);
         }

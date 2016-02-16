@@ -293,11 +293,15 @@ public class MapActivity extends Activity {
 
     private Map[] createMaps() {
 
-        String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20140106/21781/%1$s/%3$d/%2$d.jpeg";
+        String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20151231/21781/%1$s/%3$d/%2$d.jpeg";
 
-        Layer[] layers = {new Layer("CH16", "16", urlFormat, 420000f, 350000f, 250f, 256, 256, 0, 0, 7, 4), new Layer("CH17", "17", urlFormat, 420000f, 350000f, 100f, 256, 256, 0, 0, 18, 12),
-                new Layer("CH18", "18", urlFormat, 420000f, 350000f, 50f, 256, 256, 0, 0, 37, 24), new Layer("CH19", "19", urlFormat, 420000f, 350000f, 20f, 256, 256, 0, 0, 93, 62),
-                new Layer("CH20", "20", urlFormat, 420000f, 350000f, 10f, 256, 256, 0, 0, 187, 124), new Layer("CH21", "21", urlFormat, 420000f, 350000f, 5f, 256, 256, 0, 0, 374, 249),
+        Layer[] pixelkarteFarbe = {
+                new Layer("CH16", "16", urlFormat, 420000f, 350000f, 250f, 256, 256, 0, 0, 7, 4),
+                new Layer("CH17", "17", urlFormat, 420000f, 350000f, 100f, 256, 256, 0, 0, 18, 12),
+                new Layer("CH18", "18", urlFormat, 420000f, 350000f, 50f, 256, 256, 0, 0, 37, 24),
+                new Layer("CH19", "19", urlFormat, 420000f, 350000f, 20f, 256, 256, 0, 0, 93, 62),
+                new Layer("CH20", "20", urlFormat, 420000f, 350000f, 10f, 256, 256, 0, 0, 187, 124),
+                new Layer("CH21", "21", urlFormat, 420000f, 350000f, 5f, 256, 256, 0, 0, 374, 249),
                 // new Layer("CH22", "22",  urlFormat, 420000f, 350000f, 2.5f, 256, 256, 0, 0,  749,  499),
                 new Layer("CH23", "23", urlFormat, 420000f, 350000f, 2.0f, 256, 256, 0, 0, 937, 624),
                 // new Layer("CH24", "24",  urlFormat, 420000f, 350000f, 1.5f, 256, 256, 0, 0, 1249,  833),
@@ -305,7 +309,26 @@ public class MapActivity extends Activity {
                 //new Layer("CH26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
         };
 
-        return new Map[]{new Map("CH", layers, 0.5f, 10.0f, 1.5f, 1.5f)};
+        urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swisstlm3d-wanderwege/default/20150101/21781/%1$s/%3$d/%2$d.png";
+        // WW21, x=156, y=204
+        Layer[] swisstlm3dWanderwege = {
+//                new Layer("WW16", "16", urlFormat, 420000f, 350000f, 250f, 256, 256, 0, 0, 7, 4),
+//                new Layer("WW17", "17", urlFormat, 420000f, 350000f, 100f, 256, 256, 0, 0, 18, 12),
+//                new Layer("WW18", "18", urlFormat, 420000f, 350000f, 50f, 256, 256, 0, 0, 37, 24),
+//                new Layer("WW19", "19", urlFormat, 420000f, 350000f, 20f, 256, 256, 0, 0, 93, 62),
+//                new Layer("WW20", "20", urlFormat, 420000f, 350000f, 10f, 256, 256, 0, 0, 187, 124),
+                new Layer("WW21", "21", urlFormat, 420000f, 350000f, 5f, 256, 256, 0, 0, 374, 249),
+                // new Layer("CH22", "22",  urlFormat, 420000f, 350000f, 2.5f, 256, 256, 0, 0,  749,  499),
+                new Layer("WW23", "23", urlFormat, 420000f, 350000f, 2.0f, 256, 256, 0, 0, 937, 624),
+                // new Layer("CH24", "24",  urlFormat, 420000f, 350000f, 1.5f, 256, 256, 0, 0, 1249,  833),
+                new Layer("WW25", "25", urlFormat, 420000f, 350000f, 1.0f, 256, 256, 0, 0, 1875, 1249),
+                //new Layer("WW26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
+        };
+
+        return new Map[]{
+                new Map("CH", pixelkarteFarbe, 0.5f, 10.0f, 1.5f, 1.5f),
+                new Map("WW", swisstlm3dWanderwege, 1.5f, 10.0f, 1.5f, 1.5f)
+        };
     }
 
     private class MapViewListener implements MapView.ViewListener {
@@ -356,9 +379,10 @@ public class MapActivity extends Activity {
             if (tile == null) {
                 Log.w("TRILLIAN", "Tile=null");
             } else if (tile.getBitmap() == null) {
-                Log.w("TRILLIAN", "Tile bitmap=null" + tile);
+                Log.w("TRILLIAN", "Tile (bitmap=null):" + tile);
+                mapView.invalidate();
             } else {
-                Log.i("TRILLIAN", "Tile loaded: " + tile.toString());
+                Log.i("TRILLIAN", "Tile loaded: " + tile);
                 mapView.invalidate();
             }
         }

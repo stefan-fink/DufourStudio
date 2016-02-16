@@ -369,23 +369,35 @@ public class TileLoader {
                 connection.addRequestProperty("referer", "http://map.geo.admin.ch/");
                 InputStream inputStream = connection.getInputStream();
 
-                // read inputStream into byte[]
-                int numRead;
-                byte[] block = new byte[16384];
-                ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-                while ((numRead = inputStream.read(block, 0, block.length)) != -1) {
-                    buffer.write(block, 0, numRead);
-                }
-                inputStream.close();
-                connection.disconnect();
-                buffer.flush();
-                byte[] image = buffer.toByteArray();
+                if (connection.getResponseCode() == HttpURLConnection.HTTP_OK || connection.getResponseCode() == HttpURLConnection.HTTP_NO_CONTENT) {
 
-                // convert byte[] to Bitmap
-                Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
-                if (bitmap != null) {
-                    tile.setBitmap(bitmap);
+                    // read inputStream into byte[] if there is data
+                    ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        int numRead;
+                        byte[] block = new byte[16384];
+                        while ((numRead = inputStream.read(block, 0, block.length)) != -1) {
+                            buffer.write(block, 0, numRead);
+                        }
+                    }
+
+                    inputStream.close();
+                    connection.disconnect();
+
+                    // convert image
+                    byte[] image = null;
+                    if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
+                        buffer.flush();
+                        image = buffer.toByteArray();
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                        if (bitmap != null) {
+                            tile.setBitmap(bitmap);
+                        }
+                    }
+
+                    // write tile to database
                     tile.setLastUsed(System.currentTimeMillis());
+                    tile.setOK();
                     handler.obtainMessage(LOADED_FROM_URL, tile).sendToTarget();
                     insertOrUpdateTileBitmap(database, tile, image);
                     return true;
@@ -396,7 +408,7 @@ public class TileLoader {
             }
 
             // download failed
-            tile.setLoadFailed(true);
+            tile.setFailed();
             handler.obtainMessage(LOAD_FAILED, tile).sendToTarget();
 
             return false;

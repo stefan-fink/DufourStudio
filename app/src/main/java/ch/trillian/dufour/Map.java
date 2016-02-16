@@ -1,5 +1,7 @@
 package ch.trillian.dufour;
 
+import android.util.Log;
+
 public class Map {
 
     private final String name;
@@ -27,6 +29,10 @@ public class Map {
         layers[0].setMinScale(minScale);
         layers[layers.length - 1].setMinScale(minScaleThreshold);
         layers[layers.length - 1].setMaxScale(maxScale);
+
+        for (int i = 0; i < layers.length; i++) {
+            Log.d("TRILLIAN", String.format("Map(): name: %s, minScale: %f, maxScale: %f", layers[i].getName(), layers[i].getMinScale(), layers[i].getMaxScale()));
+        }
     }
 
     public int getLayerCount() {
@@ -55,10 +61,11 @@ public class Map {
             float scale = layer.getMeterPerPixel() / meterPerPixel;
             if (scale >= layer.getMinScale() && scale <= layer.getMaxScale()) {
                 currentLayer = layer;
+                return;
             }
         }
 
-        // TODO: should set to nothing
+        currentLayer = null;
     }
 
     public String getName() {

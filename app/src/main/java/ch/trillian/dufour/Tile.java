@@ -8,7 +8,8 @@ public class Tile {
     private final Layer layer;
     private final int x;
     private final int y;
-    private boolean loadFailed;
+    private boolean loading;
+    private boolean ok;
 
     private Bitmap bitmap;
     private long lastUsed;
@@ -43,8 +44,13 @@ public class Tile {
         return y;
     }
 
+    public void setLoading() {
+        loading = true;
+        ok = false;
+    }
+
     public boolean isLoading() {
-        return !loadFailed && bitmap == null;
+        return loading;
     }
 
     public Bitmap getBitmap() {
@@ -63,11 +69,21 @@ public class Tile {
         this.lastUsed = lastUsed;
     }
 
-    public boolean isLoadFailed() {
-        return loadFailed;
+    public boolean isOk() {
+        return ok;
     }
 
-    public void setLoadFailed(boolean loadFailed) {
-        this.loadFailed = loadFailed;
+    public boolean isFailed() {
+        return !ok;
+    }
+
+    public void setOK() {
+        loading = false;
+        ok = true;
+    }
+
+    public void setFailed() {
+        loading = false;
+        ok = false;
     }
 }

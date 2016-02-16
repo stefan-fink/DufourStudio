@@ -21,7 +21,7 @@ public class TileTable {
             + COL_X + " INTEGER NOT NULL, "
             + COL_Y + " INTEGER NOT NULL, "
             + COL_LAST_USED + " INTEGER NOT NULL, "
-            + COL_IMAGE + " BLOB NOT NULL, "
+            + COL_IMAGE + " BLOB, "
             + "PRIMARY KEY (" + COL_MAP_ID + ", " + COL_LAYER_ID + ", " + COL_X + ", " + COL_Y + ")"
             + ");";
 
