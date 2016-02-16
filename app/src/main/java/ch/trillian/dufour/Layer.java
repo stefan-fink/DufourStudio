@@ -35,6 +35,11 @@ public class Layer {
     private float minScale;
     private float maxScale;
 
+    private int minTileX;
+    private int maxTileX;
+    private int minTileY;
+    private int maxTileY;
+
     private Map map;
     private int index;
 
@@ -157,11 +162,17 @@ public class Layer {
         return name;
     }
 
-    public float getLeft() { return left; }
+    public float getLeft() {
+        return left;
+    }
 
-    public float getTop() { return top; }
+    public float getTop() {
+        return top;
+    }
 
-    public int getTileSizeX() { return tileSizeX; }
+    public int getTileSizeX() {
+        return tileSizeX;
+    }
 
     public int getTileSizeY() {
         return tileSizeY;
@@ -205,5 +216,37 @@ public class Layer {
 
     public void setMaxScale(float maxScale) {
         this.maxScale = maxScale;
+    }
+
+    public int getMinTileX() {
+        return minTileX;
+    }
+
+    public void setMinTileX(int minTileX) {
+        this.minTileX = minTileX;
+    }
+
+    public int getMaxTileX() {
+        return maxTileX;
+    }
+
+    public void setMaxTileX(int maxTileX) {
+        this.maxTileX = maxTileX;
+    }
+
+    public int getMinTileY() {
+        return minTileY;
+    }
+
+    public void setMinTileY(int minTileY) {
+        this.minTileY = minTileY;
+    }
+
+    public int getMaxTileY() {
+        return maxTileY;
+    }
+
+    public void setMaxTileY(int maxTileY) {
+        this.maxTileY = maxTileY;
     }
 }

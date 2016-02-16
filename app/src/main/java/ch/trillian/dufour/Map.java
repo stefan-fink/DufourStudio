@@ -1,12 +1,11 @@
 package ch.trillian.dufour;
 
-import android.util.Log;
-
 public class Map {
 
     private final String name;
     private final Layer[] layers;
     private TileCache tileCache;
+    private Layer currentLayer;
 
     public Map(String name, Layer[] layers, float minScale, float maxScale, float minScaleThreshold, float maxScaleThreshold) {
 
@@ -40,27 +39,26 @@ public class Map {
         return layers[layerIndex];
     }
 
-    public Layer getMatchingLayer(Layer actualLayer, float meterPerPixel) {
-
-        Log.w("TRILLIAN", String.format("scale() meterPerPixel: %f, actualLayer.getMeterPerPixel: %f, actualLayer.getMinScale: %f, actualLayer.getMaxScale: %f", meterPerPixel, actualLayer.getMeterPerPixel(), actualLayer.getMinScale(), actualLayer.getMaxScale()));
+    public void setMatchingLayer(float meterPerPixel) {
 
         // return actual layer if it still matches
-        float scale = actualLayer.getMeterPerPixel() / meterPerPixel;
-        if (scale >= actualLayer.getMinScale() && scale <= actualLayer.getMaxScale()) {
-            return actualLayer;
+        if (currentLayer != null) {
+            float scale = currentLayer.getMeterPerPixel() / meterPerPixel;
+            if (scale >= currentLayer.getMinScale() && scale <= currentLayer.getMaxScale()) {
+                return;
+            }
         }
 
         // find first matching layer
         // TODO: should find best match, not first one
         for (Layer layer : layers) {
-            scale = layer.getMeterPerPixel() / meterPerPixel;
+            float scale = layer.getMeterPerPixel() / meterPerPixel;
             if (scale >= layer.getMinScale() && scale <= layer.getMaxScale()) {
-                return layer;
+                currentLayer = layer;
             }
         }
 
-        // TODO: should return nothing
-        return actualLayer;
+        // TODO: should set to nothing
     }
 
     public String getName() {
@@ -77,5 +75,13 @@ public class Map {
 
     public void setTileCache(TileCache tileCache) {
         this.tileCache = tileCache;
+    }
+
+    public Layer getCurrentLayer() {
+        return currentLayer;
+    }
+
+    public void setCurrentLayer(Layer currentLayer) {
+        this.currentLayer = currentLayer;
     }
 }

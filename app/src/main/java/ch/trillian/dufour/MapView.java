@@ -33,8 +33,8 @@ public class MapView extends View {
 
     private static final int INVALID_POINTER_ID = -1;
 
-    // the map
-    private Layer layer;
+    // the maps
+    private Map[] maps = new Map[] {};
 
     // attributes
     private float mapGridTextSize;
@@ -85,13 +85,6 @@ public class MapView extends View {
     private float meterPerPixel;
     private float meterX;
     private float meterY;
-
-    // min and max coordinates of tiles on screen
-    // TODO: these are layer dependent and must be in a layer dependent structure
-    private int minTileX;
-    private int maxTileX;
-    private int minTileY;
-    private int maxTileY;
 
     // stuff for motion detection
     float lastTouchX;
@@ -161,13 +154,6 @@ public class MapView extends View {
         // Create our ScaleGestureDetector
         mScaleGestureDetector = new ScaleGestureDetector(context, new ScaleListener());
         mGestureDetector = new GestureDetector(context, new GestureListener());
-
-        // create a default Map
-        String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20140106/21781/%1$s/%3$d/%2$d.jpeg";
-
-        Layer[] layers = {new Layer("CH25", "25", urlFormat, 420000f, 350000f, 1.0f, 256, 256, 0, 0, 1875, 1249)};
-        new Map("Default", layers, 0.5f, 10.0f, 1.5f, 1.5f);
-        layer = layers[0];
     }
 
     private void initPainters() {
@@ -258,10 +244,9 @@ public class MapView extends View {
         meterY = focusCh1903Y + focusScreenY * meterPerPixel;
 
         // maybe layer changed
-        // TODO: loop over all layers
-        layer = layer.getMap().getMatchingLayer(layer, meterPerPixel);
-
-        Log.w("TRILLIAN", String.format("scale() meterPerPixel: %f, meterX: %f, meterY: %f, layer.getMeterPerPixel: %f", meterPerPixel, meterX, meterY, layer.getMeterPerPixel()));
+        for(Map map : maps) {
+            map.setMatchingLayer(meterPerPixel);
+        }
 
         invalidate();
     }
@@ -388,22 +373,14 @@ public class MapView extends View {
         return true;
     }
 
-    private float map2screen(float map, float scale, float position) {
-
-        return (position + map) * scale;
-    }
-
-    private float screen2map(float screen, float scale, float position) {
-
-        return screen / scale - position;
-    }
-
     @SuppressLint("DefaultLocale")
     protected void onDraw(Canvas canvas) {
 
         super.onDraw(canvas);
 
-        drawMap(canvas);
+        for(Map map : maps) {
+            drawMap(canvas, map);
+        }
 
         drawPoiPosition(canvas);
 
@@ -414,7 +391,13 @@ public class MapView extends View {
         drawCross(canvas);
     }
 
-    private void drawMap(Canvas canvas) {
+    private void drawMap(Canvas canvas, Map map) {
+
+        Layer layer = map.getCurrentLayer();
+
+        if (layer == null) {
+            return;
+        }
 
         // prepare canvas
         float scale = layer.getMeterPerPixel() / meterPerPixel;
@@ -425,7 +408,11 @@ public class MapView extends View {
         canvas.scale(scale, scale);
 
         // order tiles to draw
-        updateTilesMinMax();
+        updateTilesMinMax(layer);
+        int minTileX = layer.getMinTileX();
+        int maxTileX = layer.getMaxTileX();
+        int minTileY = layer.getMinTileY();
+        int maxTileY = layer.getMaxTileY();
 
         float incX = layer.getTileSizeX();
         float incY = layer.getTileSizeY();
@@ -602,7 +589,7 @@ public class MapView extends View {
         canvas.restore();
     }
 
-    private void updateTilesMinMax() {
+    private void updateTilesMinMax(Layer layer) {
 
         // calculate new tile-region
         int minTileXnew = (int) Math.floor((meterX - layer.getLeft()) / layer.getMeterPerPixel() / layer.getTileSizeX());
@@ -611,17 +598,17 @@ public class MapView extends View {
         int maxTileYnew = (int) Math.floor((layer.getTop()- meterY + screenSizeY * meterPerPixel) / layer.getMeterPerPixel() / layer.getTileSizeY());
 
         // remember new values and preload new region
-        if (minTileXnew != minTileX || maxTileXnew != maxTileX || minTileYnew != minTileY || maxTileYnew != maxTileY) {
+        if (minTileXnew != layer.getMinTileX() || maxTileXnew != layer.getMaxTileX() || minTileYnew != layer.getMinTileY() || maxTileYnew != layer.getMaxTileY()) {
 
             // remember new values
-            minTileX = minTileXnew;
-            maxTileX = maxTileXnew;
-            minTileY = minTileYnew;
-            maxTileY = maxTileYnew;
+            layer.setMinTileX(minTileXnew);
+            layer.setMaxTileX(maxTileXnew);
+            layer.setMinTileY(minTileYnew);
+            layer.setMaxTileY(maxTileYnew);
 
             // preload tiles
             if (viewListener != null) {
-                viewListener.preloadRegion(layer, minTileX, maxTileX, minTileY, maxTileY);
+                viewListener.preloadRegion(layer, minTileXnew, maxTileXnew, minTileYnew, maxTileYnew);
             }
         }
     }
@@ -666,11 +653,6 @@ public class MapView extends View {
     public Location getPoiLocation() {
 
         return poiLocation;
-    }
-
-    public Location getGpsLocation() {
-
-        return gpsLastLocation;
     }
 
     public void setGpsLocation(Location location) {
@@ -744,23 +726,16 @@ public class MapView extends View {
         updateGpsStatus();
     }
 
-    public Layer getLayer() {
+    public void setMaps(Map[] maps, float meterPerPixel) {
 
-        return layer;
-    }
-
-    public void setLayer(Layer layer, float meterPerPixel) {
-
-        this.layer = layer;
-
+        this.maps = maps;
         this.meterPerPixel = meterPerPixel;
 
+        for(Map map : maps) {
+            map.setMatchingLayer(meterPerPixel);
+        }
+
         invalidate();
-    }
-
-    public boolean isShowInfo() {
-
-        return showInfo;
     }
 
     public void setShowInfo(boolean showInfo) {

@@ -72,7 +72,7 @@ public class MapActivity extends Activity {
         // initialize view
         setContentView(R.layout.activity_map);
         mapView = (MapView) findViewById(R.id.map_view);
-        mapView.setLayer(maps[0].getLayer(5), maps[0].getLayer(5).getMeterPerPixel() / maps[0].getLayer(5).getMinScale());
+        mapView.setMaps(maps, 10);
         mapView.setLocation(getLastKnownLocation());
         mapView.setViewListener(new MapViewListener());
 
@@ -81,8 +81,7 @@ public class MapActivity extends Activity {
 
             Log.w("TRILLIAN", "onCreate(): restore InstanceState");
 
-            float meterPerPixel = savedInstanceState.getFloat(KEY_METER_PER_PIXEL);
-            mapView.setLayer(maps[0].getLayer(savedInstanceState.getInt(KEY_LAYER_INDEX)), meterPerPixel);
+            mapView.setMaps(maps, savedInstanceState.getFloat(KEY_METER_PER_PIXEL));
             mapView.setLocation((Location) savedInstanceState.getParcelable(KEY_LOCATION));
             mapView.setPoiLocation((Location) savedInstanceState.getParcelable(KEY_POI_LOCATION));
             gpsWasEnabled = savedInstanceState.getBoolean(KEY_GPS_ENABLED);
@@ -97,9 +96,8 @@ public class MapActivity extends Activity {
         Log.w("TRILLIAN", "onSaveInstanceState()");
 
         outState.putParcelable(KEY_LOCATION, mapView.getLocation());
-        outState.putParcelable(KEY_POI_LOCATION, mapView.getPoiLocation());
-        outState.putInt(KEY_LAYER_INDEX, mapView.getLayer().getIndex());
         outState.putFloat(KEY_METER_PER_PIXEL, mapView.getMeterPerPixel());
+        outState.putParcelable(KEY_POI_LOCATION, mapView.getPoiLocation());
         outState.putBoolean(KEY_GPS_ENABLED, mapView.isGpsEnabled());
         outState.putBoolean(KEY_GPS_TRACKING, mapView.isGpsTracking());
         outState.putBoolean(KEY_SHOW_INFO, showInfo);
