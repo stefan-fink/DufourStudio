@@ -18,6 +18,10 @@ public class TileLoader {
 
     private static final String TAG = "LOADER";
 
+    public static final int NUMBER_OF_PRIORITIES = 2;
+    public static final int PRIORITY_HIGH = 0;
+    public static final int PRIORITY_LOW = 1;
+
     private static final int LOADED_FROM_DB = 1;
     private static final int LOADED_FROM_URL = 2;
     private static final int LOAD_FAILED = 3;
@@ -103,9 +107,9 @@ public class TileLoader {
         this.loadListener = loadListener;
     }
 
-    public void orderLoadTile(Tile tile) {
+    public void orderLoadTile(Tile tile, int priority) {
 
-        databaseLoader.orderLoad(tile);
+        databaseLoader.orderLoad(tile, priority);
     }
 
     public void cancelLoadTile(Tile tile) {
@@ -119,55 +123,74 @@ public class TileLoader {
         private boolean pause;
         private boolean destroy;
         private Thread thread;
-        private final ArrayDeque<Tile> queue = new ArrayDeque<>();
+        private final ArrayDeque<Tile>[] queues = new ArrayDeque[NUMBER_OF_PRIORITIES];
 
         public DatabaseLoader() {
 
             thread = new Thread(this);
             thread.start();
+
+            for (int i = 0; i < NUMBER_OF_PRIORITIES; i++) {
+                queues[i] = new ArrayDeque<>();
+            }
         }
 
         public void onPause() {
 
-            synchronized (queue) {
+            synchronized (this) {
                 pause = true;
-                queue.notify();
+                this.notify();
             }
         }
 
         public void onResume() {
 
-            synchronized (queue) {
+            synchronized (this) {
                 pause = false;
-                queue.notify();
+                this.notify();
             }
         }
 
         public void onDestroy() {
 
-            synchronized (queue) {
+            synchronized (this) {
                 destroy = true;
-                queue.notify();
+                this.notify();
             }
         }
 
-        public void orderLoad(Tile tile) {
+        private int totalQueuesSize() {
 
-            synchronized (queue) {
+            int number = 0;
+
+            for (ArrayDeque queue: queues) {
+                number += queue.size();
+            }
+
+            return number;
+        }
+
+        public void orderLoad(Tile tile, int priority) {
+
+            synchronized (this) {
+
+                priority = Math.min(Math.max(0, priority), NUMBER_OF_PRIORITIES);
 
                 // put tile in order queue
-                queue.offer(tile);
+                queues[priority].offer(tile);
 
-                if (queue.size() == 1) {
-                    queue.notify();
+                if (totalQueuesSize() == 1) {
+                    this.notify();
                 }
             }
         }
 
         public void cancelLoad(Tile tile) {
 
-            synchronized (queue) {
-                queue.remove(tile);
+            synchronized (this) {
+                for (ArrayDeque queue: queues) {
+                    queue.remove(tile);
+                }
             }
         }
 
@@ -184,9 +207,9 @@ public class TileLoader {
 
                 while (true) {
 
-                    Tile tile;
+                    Tile tile = null;
 
-                    synchronized (queue) {
+                    synchronized (this) {
 
                         if (destroy) {
                             break;
@@ -194,14 +217,22 @@ public class TileLoader {
 
                         if (pause) {
                             Log.i(TAG, "DatabaseThread paused (loaded " + numTiles + " tiles).");
-                            queue.wait();
+                            this.wait();
                             numTiles = 0;
                             continue;
                         }
 
-                        if ((tile = queue.poll()) == null) {
+                        // for (ArrayDeque<Tile> queue: queues) {
+                        for (int i = 0; i < NUMBER_OF_PRIORITIES; i++) {
+                            if ((tile = queues[i].poll()) != null) {
+                                Log.i(TAG, "DatabaseThread dequeued tile from priority: " + i);
+                                break;
+                            }
+                        }
+
+                        if (tile == null) {
                             Log.i(TAG, "DatabaseThread waiting (loaded " + numTiles + " tiles).");
-                            queue.wait();
+                            this.wait();
                             numTiles = 0;
                             continue;
                         }
@@ -362,6 +393,7 @@ public class TileLoader {
         private boolean getTileFromUrl(MapDatabase database, Tile tile) {
 
             try {
+                long start = System.currentTimeMillis();
 
                 // open http stream
                 URL url = new URL(tile.getUrl());
@@ -389,11 +421,15 @@ public class TileLoader {
                     if (connection.getResponseCode() == HttpURLConnection.HTTP_OK) {
                         buffer.flush();
                         image = buffer.toByteArray();
+                        long startDecode = System.currentTimeMillis();
                         Bitmap bitmap = BitmapFactory.decodeByteArray(image, 0, image.length);
+                        // Log.i(TAG, String.format("Decoded %d bytes in %d ms (%s)", image == null ? 0 : image.length, (System.currentTimeMillis() - startDecode), tile));
                         if (bitmap != null) {
                             tile.setBitmap(bitmap);
                         }
                     }
+
+                    // Log.i(TAG, String.format("Downloaded %d bytes in %d ms (%s)", image == null ? 0 : image.length, (System.currentTimeMillis() - start), tile));
 
                     // write tile to database
                     tile.setLastUsed(System.currentTimeMillis());

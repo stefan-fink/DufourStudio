@@ -14,7 +14,7 @@ public class TileCache {
 
     public interface CacheListener {
 
-        void onOrderLoadTile(Tile tile);
+        void onOrderLoadTile(Tile tile, int priority);
 
         void onCancelLoadTile(Tile tile);
     }
@@ -52,7 +52,7 @@ public class TileCache {
         this.cacheListener = cacheListener;
     }
 
-    public Tile getTile(Layer layer, int x, int y) {
+    public Tile getTile(Layer layer, int x, int y, int priority) {
 
         if (this.map != layer.getMap()) {
             return null;
@@ -87,7 +87,7 @@ public class TileCache {
             tile = new Tile(layer, x, y);
             tile.setLoading();
             cache[layerIndex][cacheIndexY][cacheIndexX] = tile;
-            orderLoad(tile);
+            orderLoad(tile, priority);
         }
 
         return tile;
@@ -123,7 +123,7 @@ public class TileCache {
         // order loads for all region's tiles
         for (int y = maxTileY; y >= minTileY; y--) {
             for (int x = maxTileX; x >= minTileX; x--) {
-                getTile(layer, x, y);
+                getTile(layer, x, y, TileLoader.PRIORITY_HIGH);
             }
         }
 
@@ -131,23 +131,23 @@ public class TileCache {
         for (int y = maxTileY + PRELOAD_SIZE; y >= minTileY - PRELOAD_SIZE; y--) {
             if (y > maxTileY || y < minTileY) {
                 for (int x = maxTileX + PRELOAD_SIZE; x >= minTileX - PRELOAD_SIZE; x--) {
-                    getTile(layer, x, y);
+                    getTile(layer, x, y, TileLoader.PRIORITY_LOW);
                 }
             } else {
                 for (int x = maxTileX + PRELOAD_SIZE; x > maxTileX; x--) {
-                    getTile(layer, x, y);
+                    getTile(layer, x, y, TileLoader.PRIORITY_LOW);
                 }
                 for (int x = minTileX - PRELOAD_SIZE; x < minTileX; x++) {
-                    getTile(layer, x, y);
+                    getTile(layer, x, y, TileLoader.PRIORITY_LOW);
                 }
             }
         }
     }
 
-    private void orderLoad(Tile tile) {
+    private void orderLoad(Tile tile, int priority) {
 
         if (cacheListener != null) {
-            cacheListener.onOrderLoadTile(tile);
+            cacheListener.onOrderLoadTile(tile, priority);
         }
     }
 

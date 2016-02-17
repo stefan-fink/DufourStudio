@@ -357,7 +357,7 @@ public class MapActivity extends Activity {
                 return null;
             }
 
-            return tileCache.getTile(layer, x, y);
+            return tileCache.getTile(layer, x, y, TileLoader.PRIORITY_HIGH);
         }
 
         @Override
@@ -391,10 +391,10 @@ public class MapActivity extends Activity {
     private class CacheListener implements TileCache.CacheListener {
 
         @Override
-        public void onOrderLoadTile(Tile tile) {
+        public void onOrderLoadTile(Tile tile, int priority) {
 
             // Log.w("TRILLIAN", "onOrderLoadTile: " + tile);
-            tileLoader.orderLoadTile(tile);
+            tileLoader.orderLoadTile(tile, priority);
         }
 
         @Override
