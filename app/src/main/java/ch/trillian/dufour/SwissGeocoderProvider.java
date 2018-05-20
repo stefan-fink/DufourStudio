@@ -22,8 +22,7 @@ import java.net.URL;
 public class SwissGeocoderProvider extends ContentProvider {
 
     private static final String TAG = "GEOCODER";
-
-    private static final String BASE_URL = "http://api3.geo.admin.ch/rest/services/ech/SearchServer?type=locations&lang=de";
+    private static final String BASE_URL = "https://api3.geo.admin.ch/rest/services/ech/SearchServer?sr=2056&type=locations&lang=de";
     private static final String LOCATION_PARAM = "searchText";
 
     @Override
@@ -96,8 +95,8 @@ public class SwissGeocoderProvider extends ContentProvider {
                     String box = attributes.getString("geom_st_box2d");
                     String label = attributes.getString("label");
 
-                    // skip origins other than gg25 or address
-                    if (!"sn25".equals(origin) && !"address".equals(origin)) {
+                    // skip origins other than gazetteer or address
+                    if (!("gazetteer".equals(origin) || "address".equals(origin))) {
                         continue;
                     }
 
@@ -110,6 +109,11 @@ public class SwissGeocoderProvider extends ContentProvider {
                     // get mean value of bounding box
                     double x = (Double.valueOf(coordinates[0]) + Double.valueOf(coordinates[2])) / 2d;
                     double y = (Double.valueOf(coordinates[1]) + Double.valueOf(coordinates[3])) / 2d;
+
+                    // remove millions in ch1903 coordinates!
+                    x = x % 1000000;
+                    y = y % 1000000;
+
                     double[] wgs84 = Ch1903.ch1903toWgs84to(x, y, 0);
 
                     // build intent's data
@@ -118,8 +122,13 @@ public class SwissGeocoderProvider extends ContentProvider {
                     uriBuilder.appendQueryParameter("latitude", String.valueOf(wgs84[1]));
 
                     // prepare label
-                    label = label.replaceAll("^<b>", "");
-                    label = label.replaceAll("</b>", "");
+                    label = label.replaceAll("<i>", "");
+                    label = label.replaceAll("</i>", "");
+                    if (label.endsWith("</b>")) {
+                        label = label.replaceAll("</b>", "");
+                    } else {
+                        label = label.replaceAll("</b>", " - ");
+                    }
                     String[] lines = label.split("<b>", 2);
 
                     // build result row

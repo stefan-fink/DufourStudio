@@ -293,7 +293,7 @@ public class MapActivity extends Activity {
 
     private Map[] createMaps() {
 
-        String urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/20151231/21781/%1$s/%3$d/%2$d.jpeg";
+        String urlFormat = "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.pixelkarte-farbe/default/current/2056/%1$s/%2$d/%3$d.jpeg";
 
         Layer[] pixelkarteFarbe = {
                 new Layer("CH16", "16", urlFormat, 420000f, 350000f, 250f, 256, 256, 0, 0, 7, 4),
@@ -306,10 +306,11 @@ public class MapActivity extends Activity {
                 new Layer("CH23", "23", urlFormat, 420000f, 350000f, 2.0f, 256, 256, 0, 0, 937, 624),
                 // new Layer("CH24", "24",  urlFormat, 420000f, 350000f, 1.5f, 256, 256, 0, 0, 1249,  833),
                 new Layer("CH25", "25", urlFormat, 420000f, 350000f, 1.0f, 256, 256, 0, 0, 1875, 1249),
-                //new Layer("CH26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
+                new Layer("CH26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
         };
 
-        urlFormat = "http://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swisstlm3d-wanderwege/default/20150101/21781/%1$s/%3$d/%2$d.png";
+        urlFormat = "https://wmts.geo.admin.ch/1.0.0/ch.swisstopo.swisstlm3d-wanderwege/default/current/2056/%1$s/%2$d/%3$d.png";
+
         // WW21, x=156, y=204
         Layer[] swisstlm3dWanderwege = {
 //                new Layer("WW16", "16", urlFormat, 420000f, 350000f, 250f, 256, 256, 0, 0, 7, 4),
@@ -322,7 +323,7 @@ public class MapActivity extends Activity {
                 new Layer("WW23", "23", urlFormat, 420000f, 350000f, 2.0f, 256, 256, 0, 0, 937, 624),
                 // new Layer("CH24", "24",  urlFormat, 420000f, 350000f, 1.5f, 256, 256, 0, 0, 1249,  833),
                 new Layer("WW25", "25", urlFormat, 420000f, 350000f, 1.0f, 256, 256, 0, 0, 1875, 1249),
-                //new Layer("WW26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
+                new Layer("WW26", "26",  urlFormat, 420000f, 350000f, 0.5f, 256, 256, 0, 0, 3749, 2499),
         };
 
         return new Map[]{
